@@ -38,8 +38,18 @@ class HomePage extends GetView<QrController> {
                     // Type selector
                     _TypeSelector(ctrl: controller),
                     SizedBox(height: 16.h),
-                    // Form
-                    Obx(() => _buildForm(controller.qrType.value)),
+                    // Form with AnimatedSwitcher for fade transition on type change
+                    Obx(() {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder: (child, anim) =>
+                            FadeTransition(opacity: anim, child: child),
+                        child: KeyedSubtree(
+                          key: ValueKey(controller.qrType.value),
+                          child: _buildForm(controller.qrType.value),
+                        ),
+                      );
+                    }),
                     SizedBox(height: 20.h),
                     // QR Preview
                     _QrPreview(ctrl: controller),
@@ -174,53 +184,64 @@ class _QrPreview extends StatelessWidget {
         ),
         child: Column(
           children: [
-            if (data.isEmpty)
-              SizedBox(
-                width: 180.r,
-                height: 180.r,
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.qr_code_2_rounded,
-                        size: 64.r,
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.4),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'fill_form'.tr,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: cs.onSurfaceVariant,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              transitionBuilder: (child, anim) => ScaleTransition(
+                scale: CurvedAnimation(
+                  parent: anim,
+                  curve: Curves.easeOutBack,
+                ),
+                child: FadeTransition(opacity: anim, child: child),
+              ),
+              child: data.isEmpty
+                  ? SizedBox(
+                      key: const ValueKey('empty'),
+                      width: 196.r,
+                      height: 196.r,
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.qr_code_2_rounded,
+                              size: 64.r,
+                              color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'fill_form'.tr,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                color: cs.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              RepaintBoundary(
-                key: ctrl.qrKey,
-                child: Container(
-                  color: bg,
-                  padding: EdgeInsets.all(8.r),
-                  child: QrImageView(
-                    data: data,
-                    version: QrVersions.auto,
-                    size: 180.r,
-                    eyeStyle: QrEyeStyle(
-                      eyeShape: QrEyeShape.square,
-                      color: fg,
+                    )
+                  : RepaintBoundary(
+                      key: ctrl.qrKey,
+                      child: Container(
+                        key: ValueKey(data),
+                        color: bg,
+                        padding: EdgeInsets.all(8.r),
+                        child: QrImageView(
+                          data: data,
+                          version: QrVersions.auto,
+                          size: 180.r,
+                          eyeStyle: QrEyeStyle(
+                            eyeShape: QrEyeShape.square,
+                            color: fg,
+                          ),
+                          dataModuleStyle: QrDataModuleStyle(
+                            dataModuleShape: QrDataModuleShape.square,
+                            color: fg,
+                          ),
+                          backgroundColor: bg,
+                        ),
+                      ),
                     ),
-                    dataModuleStyle: QrDataModuleStyle(
-                      dataModuleShape: QrDataModuleShape.square,
-                      color: fg,
-                    ),
-                    backgroundColor: bg,
-                  ),
-                ),
-              ),
+            ),
           ],
         ),
       );
