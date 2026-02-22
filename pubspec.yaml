@@ -38,6 +38,8 @@ dependencies:
   intl: ^0.20.2
   share_plus: ^12.0.1
 
+  qr_flutter: ^4.1.0
+
   # ---- 앱별 추가 패키지 (필요시 아래 주석 해제) ----
   # fl_chart: ^0.70.2              # 차트 (가계부, 습관, 통계)
   # flutter_local_notifications:    # 알림 (타이머, 리마인더)

@@ -1,9 +1,3 @@
-// ================================================
-// DangunDad Flutter App - translate.dart Template
-// ================================================
-// mbti_pro 프로덕션 패턴 기반
-// 개발 시 한국어(ko)만 정의, 다국어는 추후 추가
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -32,21 +26,45 @@ class Languages extends Translations {
       'success': 'Success',
       'loading': 'Loading...',
       'no_data': 'No data',
+      'copy': 'Copy',
 
-      // Settings
-      'dark_mode': 'Dark Mode',
-      'language': 'Language',
-      'about': 'About',
-      'version': 'Version',
-      'rate_app': 'Rate App',
-      'privacy_policy': 'Privacy Policy',
-      'remove_ads': 'Remove Ads',
+      // App
+      'app_name': 'QR Generator',
+      'fill_form': 'Fill in the form to generate a QR code',
+      'history': 'History',
+      'no_history': 'No history yet',
+      'clear_all': 'Clear All',
+      'copied': 'Copied',
+      'qr_empty_error': 'Please fill in the required fields first',
 
-      // Feedback
-      'send_feedback': 'Send Feedback',
-      'more_apps': 'More Apps',
+      // Colors
+      'fg_color': 'QR Color',
+      'bg_color': 'Background',
 
-      // ---- App-specific translations ----
+      // URL
+      'url_label': 'URL',
+
+      // Text
+      'text_label': 'Text',
+      'text_hint': 'Enter any text...',
+
+      // WiFi
+      'wifi_ssid': 'Network Name (SSID)',
+      'wifi_password': 'Password',
+      'wifi_security': 'Security Type',
+
+      // Contact
+      'contact_name': 'Full Name',
+      'contact_phone': 'Phone Number',
+      'contact_email': 'Email',
+      'contact_org': 'Organization',
+
+      // Email
+      'email_to': 'To (Email)',
+      'email_subject': 'Subject',
+      'email_subject_hint': 'Enter subject...',
+      'email_body': 'Message',
+      'email_body_hint': 'Enter message...',
     },
     'ko': {
       // 공통
@@ -65,21 +83,45 @@ class Languages extends Translations {
       'success': '성공',
       'loading': '로딩 중...',
       'no_data': '데이터 없음',
+      'copy': '복사',
 
-      // 설정
-      'dark_mode': '다크 모드',
-      'language': '언어',
-      'about': '앱 정보',
-      'version': '버전',
-      'rate_app': '앱 평가',
-      'privacy_policy': '개인정보처리방침',
-      'remove_ads': '광고 제거',
+      // 앱
+      'app_name': 'QR 생성기',
+      'fill_form': '폼을 입력하면 QR 코드가 생성됩니다',
+      'history': '히스토리',
+      'no_history': '아직 생성 기록이 없습니다',
+      'clear_all': '전체 삭제',
+      'copied': '복사됨',
+      'qr_empty_error': '필수 항목을 먼저 입력해 주세요',
 
-      // 피드백
-      'send_feedback': '피드백 보내기',
-      'more_apps': '더 많은 앱',
+      // 색상
+      'fg_color': 'QR 색상',
+      'bg_color': '배경색',
 
-      // ---- 앱별 번역 추가 ----
+      // URL
+      'url_label': 'URL 주소',
+
+      // 텍스트
+      'text_label': '텍스트',
+      'text_hint': '텍스트를 입력하세요...',
+
+      // WiFi
+      'wifi_ssid': '네트워크 이름 (SSID)',
+      'wifi_password': '비밀번호',
+      'wifi_security': '보안 방식',
+
+      // 연락처
+      'contact_name': '이름',
+      'contact_phone': '전화번호',
+      'contact_email': '이메일',
+      'contact_org': '회사/조직',
+
+      // 이메일
+      'email_to': '받는 사람 (이메일)',
+      'email_subject': '제목',
+      'email_subject_hint': '제목을 입력하세요...',
+      'email_body': '내용',
+      'email_body_hint': '내용을 입력하세요...',
     },
   };
 }
