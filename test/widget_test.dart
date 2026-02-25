@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qr_code_generator/main.dart';
 
 void main() {
-  testWidgets('placeholder test', (WidgetTester tester) async {
-    // TODO: Add widget tests
-    expect(true, isTrue);
+  testWidgets('qr_code_generator smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(const QrCodeGeneratorApp());
+
+    expect(find.byType(QrCodeGeneratorApp), findsOneWidget);
   });
 }
