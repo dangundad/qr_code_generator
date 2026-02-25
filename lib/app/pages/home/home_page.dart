@@ -861,6 +861,69 @@ class _HistorySheet extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
+          // History limit banner
+          Obx(() {
+            final count = ctrl.history.length;
+            final limit = ctrl.maxHistory.value;
+            final isUnlimited = ctrl.isHistoryUnlimited;
+            if (isUnlimited) return const SizedBox.shrink();
+            return Container(
+              margin: EdgeInsets.only(bottom: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.history_rounded, size: 18.r, color: cs.primary),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$count / $limit ${'history_limit_label'.tr}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onPrimaryContainer,
+                          ),
+                        ),
+                        if (count >= limit)
+                          Text(
+                            'history_limit_full'.tr,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: cs.onPrimaryContainer.withValues(alpha: 0.8),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  FilledButton.tonal(
+                    onPressed: ctrl.unlockUnlimitedHistory,
+                    style: FilledButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.play_circle_outline_rounded, size: 14.r),
+                        SizedBox(width: 4.w),
+                        Text(
+                          'history_unlock_btn'.tr,
+                          style: TextStyle(fontSize: 11.sp),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
           Obx(() {
             if (ctrl.history.isEmpty) {
               return Padding(
@@ -875,7 +938,7 @@ class _HistorySheet extends StatelessWidget {
               );
             }
             return ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 400.h),
+              constraints: BoxConstraints(maxHeight: 340.h),
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: ctrl.history.length,

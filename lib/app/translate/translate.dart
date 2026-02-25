@@ -132,6 +132,13 @@ class Languages extends Translations {
       'premium_ready': 'Premium is now active.',
       'go_premium': 'Go Premium',
       'go_premium_subtitle': 'Unlock all paid features',
+
+      // History limit
+      'history_limit_label': 'history limit',
+      'history_limit_full': 'History is full. Watch an ad to expand!',
+      'history_unlock_btn': 'Expand',
+      'history_unlocked_title': 'Unlocked!',
+      'history_unlocked_desc': 'History is now unlimited.',
     },
     'ko': {
       'stats': '통계',
@@ -215,6 +222,13 @@ class Languages extends Translations {
       'unique_routes': '고유 경로',
       'unique_screens': '고유 화면',
       'top_events': '상위 이벤트',
+
+      // 히스토리 한도
+      'history_limit_label': '히스토리 한도',
+      'history_limit_full': '히스토리가 꽉 찼습니다. 광고를 시청해 확장하세요!',
+      'history_unlock_btn': '확장',
+      'history_unlocked_title': '확장 완료!',
+      'history_unlocked_desc': '히스토리가 무제한으로 확장되었습니다.',
     },
   };
 }

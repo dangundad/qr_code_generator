@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 
+import 'package:qr_code_generator/app/admob/ads_rewarded.dart';
 import 'package:qr_code_generator/app/data/enums/qr_type.dart';
 import 'package:qr_code_generator/app/services/hive_service.dart';
 
@@ -17,7 +18,12 @@ class QrController extends GetxController {
   static QrController get to => Get.find();
 
   static const _historyKey = 'qr_history_json';
-  static const _maxHistory = 20;
+  static const _historyUnlockedKey = 'qr_history_unlocked';
+  static const _defaultMaxHistory = 20;
+  static const _unlockedMaxHistory = 999;
+
+  // Observable max history limit
+  final maxHistory = _defaultMaxHistory.obs;
 
   // Type
   final qrType = QrType.url.obs;
@@ -78,6 +84,7 @@ class QrController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadHistoryLimit();
     _loadHistory();
 
     // Listeners to regenerate QR data
@@ -263,6 +270,30 @@ class QrController extends GetxController {
     }
   }
 
+  // ─── History limit unlock ───────────────────────
+
+  void _loadHistoryLimit() {
+    final unlocked = HiveService.to.getAppData<bool>(_historyUnlockedKey) ?? false;
+    maxHistory.value = unlocked ? _unlockedMaxHistory : _defaultMaxHistory;
+  }
+
+  bool get isHistoryUnlimited => maxHistory.value >= _unlockedMaxHistory;
+
+  void unlockUnlimitedHistory() {
+    RewardedAdManager.to.showAdIfAvailable(
+      onUserEarnedReward: (_) async {
+        maxHistory.value = _unlockedMaxHistory;
+        await HiveService.to.setAppData(_historyUnlockedKey, true);
+        Get.snackbar(
+          'history_unlocked_title'.tr,
+          'history_unlocked_desc'.tr,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
+      },
+    );
+  }
+
   // ─── History ────────────────────────────────────
 
   void _loadHistory() {
@@ -288,7 +319,7 @@ class QrController extends GetxController {
     // Remove duplicate
     history.removeWhere((e) => e['content'] == data);
     history.insert(0, entry);
-    if (history.length > _maxHistory) history.removeLast();
+    if (history.length > maxHistory.value) history.removeLast();
     _saveHistory();
   }
 
