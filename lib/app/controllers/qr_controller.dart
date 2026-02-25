@@ -264,7 +264,7 @@ class QrController extends GetxController {
         final t = textCtrl.text.trim();
         return t.length > 30 ? '${t.substring(0, 30)}…' : t;
       case QrType.wifi:
-        return 'WiFi: ${wifiSsidCtrl.text.trim()}';
+        return 'history_wifi_label'.trParams({'ssid': wifiSsidCtrl.text.trim()});
       case QrType.contact:
         return contactNameCtrl.text.trim();
       case QrType.email:

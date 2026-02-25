@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import 'package:qr_code_generator/app/admob/ads_banner.dart';
 import 'package:qr_code_generator/app/admob/ads_helper.dart';
+import 'package:qr_code_generator/app/routes/app_pages.dart';
 import 'package:qr_code_generator/app/controllers/qr_controller.dart';
 import 'package:qr_code_generator/app/data/enums/qr_type.dart';
 
@@ -16,59 +17,79 @@ class HomePage extends GetView<QrController> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: cs.surface,
-      appBar: AppBar(
-        title: Text('app_name'.tr),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history_rounded),
-            onPressed: () => _showHistorySheet(context),
-            tooltip: 'history'.tr,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              cs.primary.withValues(alpha: 0.12),
+              cs.surface,
+              cs.secondaryContainer.withValues(alpha: 0.16),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                child: Column(
-                  children: [
-                    // Type selector
-                    _TypeSelector(ctrl: controller),
-                    SizedBox(height: 16.h),
-                    // Form with AnimatedSwitcher for fade transition on type change
-                    Obx(() {
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder: (child, anim) =>
-                            FadeTransition(opacity: anim, child: child),
-                        child: KeyedSubtree(
-                          key: ValueKey(controller.qrType.value),
-                          child: _buildForm(controller.qrType.value),
-                        ),
-                      );
-                    }),
-                    SizedBox(height: 20.h),
-                    // QR Preview
-                    _QrPreview(ctrl: controller),
-                    SizedBox(height: 16.h),
-                    // Color palette
-                    _ColorPicker(ctrl: controller),
-                    SizedBox(height: 20.h),
-                    // Action buttons
-                    _ActionBar(ctrl: controller),
-                    SizedBox(height: 16.h),
-                  ],
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+                child: _Header(
+                  cs: cs,
+                  onHistory: () => _showHistorySheet(context),
+                  onGuide: () => Get.toNamed(Routes.GUIDE),
+                  onSettings: () => Get.toNamed(Routes.SETTINGS),
                 ),
               ),
-            ),
-            BannerAdWidget(
-              adUnitId: AdHelper.bannerAdUnitId,
-              type: AdHelper.banner,
-            ),
-          ],
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                  child: Column(
+                    children: [
+                      _TypeSelector(ctrl: controller),
+                      SizedBox(height: 14.h),
+                      Obx(() {
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder: (child, anim) =>
+                              FadeTransition(opacity: anim, child: child),
+                          child: KeyedSubtree(
+                            key: ValueKey(controller.qrType.value),
+                            child: _buildForm(controller.qrType.value),
+                          ),
+                        );
+                      }),
+                      SizedBox(height: 18.h),
+                      _QrPreview(ctrl: controller),
+                      SizedBox(height: 16.h),
+                      _ColorPicker(ctrl: controller),
+                      SizedBox(height: 18.h),
+                      _ActionBar(ctrl: controller),
+                      SizedBox(height: 16.h),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                color: cs.surface.withValues(alpha: 0.9),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 12.w,
+                      right: 12.w,
+                      top: 8.h,
+                      bottom: 10.h,
+                    ),
+                    child: BannerAdWidget(
+                      adUnitId: AdHelper.bannerAdUnitId,
+                      type: AdHelper.banner,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -93,18 +114,68 @@ class HomePage extends GetView<QrController> {
   }
 }
 
-// ─── Type Selector ────────────────────────────────────────
+class _Header extends StatelessWidget {
+  final ColorScheme cs;
+  final VoidCallback onHistory;
+  final VoidCallback onGuide;
+  final VoidCallback onSettings;
+
+  const _Header({
+    required this.cs,
+    required this.onHistory,
+    required this.onGuide,
+    required this.onSettings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.9, end: 1),
+            duration: const Duration(milliseconds: 680),
+            curve: Curves.easeOutBack,
+            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            child: Text('📱', style: TextStyle(fontSize: 30.sp)),
+          ),
+          SizedBox(width: 10.w),
+          Text(
+            'app_name'.tr,
+            style: TextStyle(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w800,
+              color: cs.onSurface,
+            ),
+          ),
+          const Spacer(),
+          IconButton(icon: const Icon(Icons.history_rounded), onPressed: onHistory, tooltip: 'history'.tr),
+          IconButton(icon: const Icon(Icons.menu_book_rounded), onPressed: onGuide, tooltip: 'guide'.tr),
+          IconButton(icon: const Icon(Icons.settings), onPressed: onSettings, tooltip: 'settings'.tr),
+        ],
+      ),
+    );
+  }
+}
+
+// Type selector buttons
 
 class _TypeSelector extends StatelessWidget {
   final QrController ctrl;
   const _TypeSelector({required this.ctrl});
 
   static const _types = [
-    (QrType.url, '🔗', 'URL'),
-    (QrType.text, '📝', 'Text'),
-    (QrType.wifi, '📶', 'WiFi'),
-    (QrType.contact, '👤', 'Contact'),
-    (QrType.email, '✉️', 'Email'),
+    (QrType.url, '🔗', 'qr_type_url'),
+    (QrType.text, '📝', 'qr_type_text'),
+    (QrType.wifi, '📶', 'qr_type_wifi'),
+    (QrType.contact, '👤', 'qr_type_contact'),
+    (QrType.email, '📧', 'qr_type_email'),
   ];
 
   @override
@@ -142,7 +213,7 @@ class _TypeSelector extends StatelessWidget {
                     Text(icon, style: TextStyle(fontSize: 18.sp)),
                     SizedBox(height: 2.h),
                     Text(
-                      label,
+                      label.tr,
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight:
@@ -161,7 +232,7 @@ class _TypeSelector extends StatelessWidget {
   }
 }
 
-// ─── QR Preview ───────────────────────────────────────────
+// ?????? QR Preview ??????????????????????????????????????????????????????????????????????????????????????
 
 class _QrPreview extends StatelessWidget {
   final QrController ctrl;
@@ -249,7 +320,7 @@ class _QrPreview extends StatelessWidget {
   }
 }
 
-// ─── Color Picker ─────────────────────────────────────────
+// ?????? Color Picker ??????????????????????????????????????????????????????????????????????????????????
 
 class _ColorPicker extends StatelessWidget {
   final QrController ctrl;
@@ -342,7 +413,7 @@ class _ColorPicker extends StatelessWidget {
   }
 }
 
-// ─── Action Bar ───────────────────────────────────────────
+// ?????? Action Bar ??????????????????????????????????????????????????????????????????????????????????????
 
 class _ActionBar extends StatelessWidget {
   final QrController ctrl;
@@ -382,7 +453,7 @@ class _ActionBar extends StatelessWidget {
   }
 }
 
-// ─── Form Widgets ─────────────────────────────────────────
+// ?????? Form Widgets ??????????????????????????????????????????????????????????????????????????????????
 
 class _UrlForm extends StatelessWidget {
   final QrController ctrl;
@@ -395,7 +466,7 @@ class _UrlForm extends StatelessWidget {
         _Field(
           ctrl: ctrl.urlCtrl,
           label: 'url_label'.tr,
-          hint: 'https://example.com',
+          hint: 'url_hint'.tr,
           icon: Icons.link_rounded,
           keyboard: TextInputType.url,
         ),
@@ -436,14 +507,14 @@ class _WifiForm extends StatelessWidget {
         _Field(
           ctrl: ctrl.wifiSsidCtrl,
           label: 'wifi_ssid'.tr,
-          hint: 'MyNetwork',
+          hint: 'wifi_ssid_hint'.tr,
           icon: Icons.wifi_rounded,
         ),
         SizedBox(height: 12.h),
         _Field(
           ctrl: ctrl.wifiPasswordCtrl,
           label: 'wifi_password'.tr,
-          hint: '••••••••',
+          hint: 'wifi_password_hint'.tr,
           icon: Icons.lock_rounded,
           obscure: true,
         ),
@@ -458,13 +529,19 @@ class _WifiForm extends StatelessWidget {
         ),
         SizedBox(height: 6.h),
         Obx(() {
+          const securityOptions = ['WPA', 'WEP', 'nopass'];
           return Row(
-            children: ['WPA', 'WEP', 'nopass'].map((s) {
+            children: securityOptions.map((s) {
+              final optionLabel = switch (s) {
+                'WPA' => 'wifi_security_wpa',
+                'WEP' => 'wifi_security_wep',
+                _ => 'wifi_security_nopass',
+              };
               final sel = ctrl.wifiSecurity.value == s;
               return Padding(
                 padding: EdgeInsets.only(right: 8.w),
                 child: ChoiceChip(
-                  label: Text(s),
+                  label: Text(optionLabel.tr),
                   selected: sel,
                   onSelected: (_) => ctrl.wifiSecurity.value = s,
                 ),
@@ -488,14 +565,14 @@ class _ContactForm extends StatelessWidget {
         _Field(
           ctrl: ctrl.contactNameCtrl,
           label: 'contact_name'.tr,
-          hint: 'John Doe',
+          hint: 'contact_name_hint'.tr,
           icon: Icons.person_rounded,
         ),
         SizedBox(height: 12.h),
         _Field(
           ctrl: ctrl.contactPhoneCtrl,
           label: 'contact_phone'.tr,
-          hint: '+1 234 567 8900',
+          hint: 'contact_phone_hint'.tr,
           icon: Icons.phone_rounded,
           keyboard: TextInputType.phone,
         ),
@@ -503,7 +580,7 @@ class _ContactForm extends StatelessWidget {
         _Field(
           ctrl: ctrl.contactEmailCtrl,
           label: 'contact_email'.tr,
-          hint: 'john@example.com',
+          hint: 'contact_email_hint'.tr,
           icon: Icons.email_rounded,
           keyboard: TextInputType.emailAddress,
         ),
@@ -511,7 +588,7 @@ class _ContactForm extends StatelessWidget {
         _Field(
           ctrl: ctrl.contactOrgCtrl,
           label: 'contact_org'.tr,
-          hint: 'Company Inc.',
+          hint: 'contact_org_hint'.tr,
           icon: Icons.business_rounded,
         ),
       ],
@@ -530,7 +607,7 @@ class _EmailForm extends StatelessWidget {
         _Field(
           ctrl: ctrl.emailAddressCtrl,
           label: 'email_to'.tr,
-          hint: 'email@example.com',
+          hint: 'email_address_hint'.tr,
           icon: Icons.email_rounded,
           keyboard: TextInputType.emailAddress,
         ),
@@ -554,7 +631,7 @@ class _EmailForm extends StatelessWidget {
   }
 }
 
-// ─── Reusable Field Widget ────────────────────────────────
+// ?????? Reusable Field Widget ????????????????????????????????????????????????????????????????
 
 class _Field extends StatelessWidget {
   final TextEditingController ctrl;
@@ -594,7 +671,7 @@ class _Field extends StatelessWidget {
   }
 }
 
-// ─── Form Card ────────────────────────────────────────────
+// ?????? Form Card ????????????????????????????????????????????????????????????????????????????????????????
 
 class _FormCard extends StatelessWidget {
   final List<Widget> children;
@@ -618,7 +695,7 @@ class _FormCard extends StatelessWidget {
   }
 }
 
-// ─── History Sheet ────────────────────────────────────────
+// History sheet
 
 class _HistorySheet extends StatelessWidget {
   final QrController ctrl;
@@ -735,8 +812,11 @@ class _HistorySheet extends StatelessWidget {
       'text': '📝',
       'wifi': '📶',
       'contact': '👤',
-      'email': '✉️',
+      'email': '📧',
     };
-    return Text(icons[type] ?? '📋', style: const TextStyle(fontSize: 24));
+    return Text(
+      icons[type] ?? '📝',
+      style: const TextStyle(fontSize: 24),
+    );
   }
 }

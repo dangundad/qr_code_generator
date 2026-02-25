@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class Languages extends Translations {
@@ -10,7 +10,7 @@ class Languages extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
     'en': {
-      // Common
+      'stats': 'Stats',
       'settings': 'Settings',
       'save': 'Save',
       'cancel': 'Cancel',
@@ -27,47 +27,112 @@ class Languages extends Translations {
       'loading': 'Loading...',
       'no_data': 'No data',
       'copy': 'Copy',
+      'refresh': 'Refresh',
 
-      // App
+      'open_history': 'Open History',
+      'open_stats': 'Open Stats',
+      'clear_all': 'Clear All',
+      'history': 'History',
+      'settings_page': 'Settings',
+      'stats_page': 'Statistics',
+      'copied': 'Copied',
+      'no_history': 'No history',
+      'unknown_event': 'Unknown',
+      'history_subtitle': 'Screen: @screen / Route: @route',
+      'history_wifi_label': 'WiFi: @ssid',
+
+      'qr_type_url': 'URL',
+      'qr_type_text': 'Text',
+      'qr_type_wifi': 'Wi-Fi',
+      'qr_type_contact': 'Contact',
+      'qr_type_email': 'Email',
+
+      'send_feedback': 'Send Feedback',
+      'more_apps': 'More Apps',
       'app_name': 'QR Generator',
       'fill_form': 'Fill in the form to generate a QR code',
-      'history': 'History',
-      'no_history': 'No history yet',
-      'clear_all': 'Clear All',
-      'copied': 'Copied',
       'qr_empty_error': 'Please fill in the required fields first',
-
-      // Colors
       'fg_color': 'QR Color',
       'bg_color': 'Background',
 
-      // URL
       'url_label': 'URL',
-
-      // Text
       'text_label': 'Text',
+      'url_hint': 'https://example.com',
       'text_hint': 'Enter any text...',
-
-      // WiFi
+      'wifi_ssid_hint': 'MyNetwork',
       'wifi_ssid': 'Network Name (SSID)',
       'wifi_password': 'Password',
       'wifi_security': 'Security Type',
-
-      // Contact
+      'wifi_password_hint': 'Password',
+      'wifi_security_wpa': 'WPA',
+      'wifi_security_wep': 'WEP',
+      'wifi_security_nopass': 'No Password',
       'contact_name': 'Full Name',
+      'contact_name_hint': 'John Doe',
       'contact_phone': 'Phone Number',
+      'contact_phone_hint': '+1 234 567 8900',
       'contact_email': 'Email',
+      'contact_email_hint': 'john@example.com',
       'contact_org': 'Organization',
-
-      // Email
+      'contact_org_hint': 'Company Inc.',
       'email_to': 'To (Email)',
+      'email_address_hint': 'email@example.com',
       'email_subject': 'Subject',
       'email_subject_hint': 'Enter subject...',
       'email_body': 'Message',
       'email_body_hint': 'Enter message...',
+
+      'guide': 'Guide',
+      'guide_title': 'How to make and use QR code',
+      'guide_tip_1_title': '1) Select QR type',
+      'guide_tip_1_desc':
+          'Choose URL, Text, Wi-Fi, Contact, or Email as the payload type.',
+      'guide_tip_2_title': '2) Fill required fields',
+      'guide_tip_2_desc':
+          'After filling a proper value, the QR image will be generated immediately.',
+      'guide_tip_3_title': '3) Adjust colors',
+      'guide_tip_3_desc':
+          'Use QR and background colors to increase contrast and make scanning easier.',
+      'guide_tip_4_title': '4) Share or copy',
+      'guide_tip_4_desc':
+          'Use Share/Copy actions and keep the generated image or string in history.',
+      'guide_footer':
+          'Your generated QR is saved automatically in app history and can be reopened anytime.',
+
+      'total_events': 'Total events',
+      'today_events': 'Today',
+      'week_events': 'This week',
+      'unique_routes': 'Routes',
+      'unique_screens': 'Screens',
+      'top_events': 'Top events',
+      'premium_title': 'Premium',
+      'premium_subtitle': 'Unlock all content, remove ads, and use all premium features.',
+      'premium_benefits': 'Premium Benefits',
+      'premium_benefit_remove_ads': 'No Ads',
+      'premium_benefit_unlimited': 'Unlock all features',
+      'premium_benefit_statistics': 'Detailed statistics',
+      'premium_plan_title': 'Choose a plan',
+      'premium_plan_weekly': 'Weekly',
+      'premium_plan_weekly_desc': '7 days',
+      'premium_plan_monthly': 'Monthly',
+      'premium_plan_monthly_desc': '30 days',
+      'premium_plan_yearly': 'Yearly',
+      'premium_plan_yearly_desc': '365 days',
+      'premium_purchase': 'Purchase Premium',
+      'premium_restore': 'Restore Purchase',
+      'premium_owned': 'Premium is active',
+      'premium_purchase_note': 'The purchase will be restored automatically when you restart the app.',
+      'purchase_error': 'Purchase Error',
+      'purchase_unavailable': 'In-app purchases are unavailable',
+      'purchase_failed': 'Purchase failed. Please try again.',
+      'restore_error': 'Restore failed. Please try again.',
+      'purchase_success': 'Purchase Completed',
+      'premium_ready': 'Premium is now active.',
+      'go_premium': 'Go Premium',
+      'go_premium_subtitle': 'Unlock all paid features',
     },
     'ko': {
-      // 공통
+      'stats': '통계',
       'settings': '설정',
       'save': '저장',
       'cancel': '취소',
@@ -78,50 +143,79 @@ class Languages extends Translations {
       'done': '완료',
       'ok': '확인',
       'yes': '예',
-      'no': '아니오',
+      'no': '아니요',
       'error': '오류',
       'success': '성공',
-      'loading': '로딩 중...',
+      'loading': '불러오는 중...',
       'no_data': '데이터 없음',
       'copy': '복사',
-
-      // 앱
-      'app_name': 'QR 생성기',
-      'fill_form': '폼을 입력하면 QR 코드가 생성됩니다',
-      'history': '히스토리',
-      'no_history': '아직 생성 기록이 없습니다',
+      'refresh': '새로고침',
+      'open_history': '히스토리',
+      'open_stats': '통계',
       'clear_all': '전체 삭제',
+      'history': '기록',
+      'settings_page': '설정',
+      'stats_page': '통계',
       'copied': '복사됨',
-      'qr_empty_error': '필수 항목을 먼저 입력해 주세요',
-
-      // 색상
+      'no_history': '기록이 없습니다',
+      'unknown_event': '알 수 없는 이벤트',
+      'history_subtitle': '화면: @screen / 경로: @route',
+      'history_wifi_label': 'WiFi: @ssid',
+      'qr_type_url': 'URL',
+      'qr_type_text': '텍스트',
+      'qr_type_wifi': 'Wi-Fi',
+      'qr_type_contact': '연락처',
+      'qr_type_email': '이메일',
+      'send_feedback': '피드백 보내기',
+      'more_apps': '더 많은 앱',
+      'app_name': 'QR 생성기',
+      'fill_form': '양식을 작성하여 QR 코드를 생성하세요',
+      'qr_empty_error': '필수 항목을 먼저 입력해주세요',
       'fg_color': 'QR 색상',
-      'bg_color': '배경색',
-
-      // URL
-      'url_label': 'URL 주소',
-
-      // 텍스트
+      'bg_color': '배경',
+      'url_label': 'URL',
       'text_label': '텍스트',
+      'url_hint': 'https://example.com',
       'text_hint': '텍스트를 입력하세요...',
-
-      // WiFi
+      'wifi_ssid_hint': 'MyNetwork',
       'wifi_ssid': '네트워크 이름 (SSID)',
       'wifi_password': '비밀번호',
-      'wifi_security': '보안 방식',
-
-      // 연락처
+      'wifi_security': '보안 유형',
+      'wifi_password_hint': '비밀번호',
+      'wifi_security_wpa': 'WPA',
+      'wifi_security_wep': 'WEP',
+      'wifi_security_nopass': '비밀번호 없음',
       'contact_name': '이름',
+      'contact_name_hint': '홍길동',
       'contact_phone': '전화번호',
+      'contact_phone_hint': '+82 10 1234 5678',
       'contact_email': '이메일',
-      'contact_org': '회사/조직',
-
-      // 이메일
-      'email_to': '받는 사람 (이메일)',
+      'contact_email_hint': 'john@example.com',
+      'contact_org': '조직',
+      'contact_org_hint': '회사명',
+      'email_to': '받는 사람',
+      'email_address_hint': 'email@example.com',
       'email_subject': '제목',
       'email_subject_hint': '제목을 입력하세요...',
-      'email_body': '내용',
-      'email_body_hint': '내용을 입력하세요...',
+      'email_body': '메시지',
+      'email_body_hint': '메시지를 입력하세요...',
+      'guide': '사용법',
+      'guide_title': 'QR 코드 만들기 및 사용법',
+      'guide_tip_1_title': '1) QR 유형 선택',
+      'guide_tip_2_title': '2) 필수 항목 입력',
+      'guide_tip_3_title': '3) 색상 조정',
+      'guide_tip_4_title': '4) 공유 또는 복사',
+      'total_events': '총 이벤트',
+      'today_events': '오늘',
+      'week_events': '이번 주',
+      'unique_routes': '고유 경로',
+      'unique_screens': '고유 화면',
+      'top_events': '상위 이벤트',
     },
   };
 }
+
+    
+
+
+
