@@ -52,6 +52,8 @@ class Languages extends Translations {
       'app_name': 'QR Generator',
       'fill_form': 'Fill in the form to generate a QR code',
       'qr_empty_error': 'Please fill in the required fields first',
+      'saved_to_gallery': 'Saved to gallery!',
+      'gallery_permission_denied': 'Gallery permission denied',
       'fg_color': 'QR Color',
       'bg_color': 'Background',
 
@@ -171,6 +173,8 @@ class Languages extends Translations {
       'app_name': 'QR 생성기',
       'fill_form': '양식을 작성하여 QR 코드를 생성하세요',
       'qr_empty_error': '필수 항목을 먼저 입력해주세요',
+      'saved_to_gallery': '갤러리에 저장되었습니다!',
+      'gallery_permission_denied': '갤러리 접근 권한이 거부되었습니다',
       'fg_color': 'QR 색상',
       'bg_color': '배경',
       'url_label': 'URL',

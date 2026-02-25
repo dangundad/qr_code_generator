@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -193,6 +195,7 @@ class _TypeSelector extends StatelessWidget {
             final selected = ctrl.qrType.value == type;
             return GestureDetector(
               onTap: () {
+                HapticFeedback.selectionClick();
                 ctrl.qrType.value = type;
                 ctrl.clearForm();
               },
@@ -330,7 +333,15 @@ class _QrPreview extends StatelessWidget {
                           backgroundColor: bg,
                         ),
                       ),
-                    ),
+                    )
+                        .animate()
+                        .scale(
+                          begin: const Offset(0.8, 0.8),
+                          end: const Offset(1.0, 1.0),
+                          curve: Curves.easeOutBack,
+                          duration: 300.ms,
+                        )
+                        .fadeIn(duration: 300.ms),
             ),
           ],
         ),
@@ -519,6 +530,21 @@ class _ActionBar extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              OutlinedButton.icon(
+                onPressed: hasData ? ctrl.saveToGallery : null,
+                icon: Icon(Icons.save_alt_rounded, size: 16.r),
+                label: Text(
+                  'save'.tr,
+                  style: TextStyle(fontSize: 13.sp),
+                ),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 14.w),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
               ),

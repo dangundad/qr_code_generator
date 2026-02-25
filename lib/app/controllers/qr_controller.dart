@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:gal/gal.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -114,7 +115,11 @@ class QrController extends GetxController {
   }
 
   void _updateQrData() {
-    qrData.value = _buildQrString();
+    final newData = _buildQrString();
+    if (newData.isNotEmpty && qrData.value != newData) {
+      HapticFeedback.lightImpact();
+    }
+    qrData.value = newData;
   }
 
   String _buildQrString() {
@@ -178,6 +183,7 @@ class QrController extends GetxController {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
       final bytes = byteData.buffer.asUint8List();
+      HapticFeedback.lightImpact();
       await _shareImageBytes(bytes);
       _addToHistory();
     } catch (e) {
@@ -197,8 +203,38 @@ class QrController extends GetxController {
     );
   }
 
+  Future<void> saveToGallery() async {
+    if (qrData.value.isEmpty) {
+      Get.snackbar('error'.tr, 'qr_empty_error'.tr, snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+    try {
+      final boundary = qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return;
+      final image = await boundary.toImage(pixelRatio: 3);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return;
+      final bytes = byteData.buffer.asUint8List();
+      HapticFeedback.lightImpact();
+      final hasAccess = await Gal.hasAccess(toAlbum: true);
+      if (!hasAccess) {
+        final granted = await Gal.requestAccess(toAlbum: true);
+        if (!granted) {
+          Get.snackbar('error'.tr, 'gallery_permission_denied'.tr, snackPosition: SnackPosition.BOTTOM);
+          return;
+        }
+      }
+      await Gal.putImageBytes(bytes, album: 'QR Generator');
+      _addToHistory();
+      Get.snackbar('success'.tr, 'saved_to_gallery'.tr, snackPosition: SnackPosition.BOTTOM);
+    } catch (e) {
+      Get.snackbar('error'.tr, '$e', snackPosition: SnackPosition.BOTTOM);
+    }
+  }
+
   void copyContent() {
     if (qrData.value.isEmpty) return;
+    HapticFeedback.lightImpact();
     Get.snackbar('copied'.tr, qrData.value,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2));
