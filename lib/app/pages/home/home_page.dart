@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -164,7 +164,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-// Type selector buttons
+// Type selector buttons — improved card style
 
 class _TypeSelector extends StatelessWidget {
   final QrController ctrl;
@@ -183,7 +183,7 @@ class _TypeSelector extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Obx(() {
       return SizedBox(
-        height: 64.h,
+        height: 72.h,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: _types.length,
@@ -198,20 +198,39 @@ class _TypeSelector extends StatelessWidget {
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                padding: EdgeInsets.symmetric(horizontal: 18.w),
                 decoration: BoxDecoration(
-                  color: selected ? cs.primaryContainer : cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(12.r),
+                  gradient: selected
+                      ? LinearGradient(
+                          colors: [
+                            cs.primary.withValues(alpha: 0.18),
+                            cs.primaryContainer,
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : null,
+                  color: selected ? null : cs.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(14.r),
                   border: Border.all(
                     color: selected ? cs.primary : Colors.transparent,
                     width: 2,
                   ),
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: cs.primary.withValues(alpha: 0.22),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(icon, style: TextStyle(fontSize: 18.sp)),
-                    SizedBox(height: 2.h),
+                    Text(icon, style: TextStyle(fontSize: 20.sp)),
+                    SizedBox(height: 3.h),
                     Text(
                       label.tr,
                       style: TextStyle(
@@ -232,7 +251,7 @@ class _TypeSelector extends StatelessWidget {
   }
 }
 
-// ?????? QR Preview ??????????????????????????????????????????????????????????????????????????????????????
+// QR Preview
 
 class _QrPreview extends StatelessWidget {
   final QrController ctrl;
@@ -320,7 +339,7 @@ class _QrPreview extends StatelessWidget {
   }
 }
 
-// ?????? Color Picker ??????????????????????????????????????????????????????????????????????????????????
+// Color Picker
 
 class _ColorPicker extends StatelessWidget {
   final QrController ctrl;
@@ -413,7 +432,7 @@ class _ColorPicker extends StatelessWidget {
   }
 }
 
-// ?????? Action Bar ??????????????????????????????????????????????????????????????????????????????????????
+// Action Bar — gradient Generate/Share button
 
 class _ActionBar extends StatelessWidget {
   final QrController ctrl;
@@ -421,31 +440,100 @@ class _ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Obx(() {
       final hasData = ctrl.qrData.value.isNotEmpty;
-      return Row(
+      return Column(
         children: [
-          Expanded(
-            flex: 2,
-            child: FilledButton.icon(
-              onPressed: hasData ? ctrl.shareQr : null,
-              icon: const Icon(Icons.share_rounded, size: 18),
-              label: Text(
-                'share'.tr,
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+          // Gradient CTA share button
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: hasData
+                  ? LinearGradient(
+                      colors: [cs.primary, cs.tertiary],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    )
+                  : null,
+              color: hasData ? null : cs.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(16.r),
+              boxShadow: hasData
+                  ? [
+                      BoxShadow(
+                        color: cs.primary.withValues(alpha: 0.35),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16.r),
+                onTap: hasData ? ctrl.shareQr : null,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.share_rounded,
+                        size: 22.r,
+                        color: hasData
+                            ? cs.onPrimary
+                            : cs.onSurface.withValues(alpha: 0.4),
+                      ),
+                      SizedBox(width: 10.w),
+                      Text(
+                        'share'.tr,
+                        style: TextStyle(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.bold,
+                          color: hasData
+                              ? cs.onPrimary
+                              : cs.onSurface.withValues(alpha: 0.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-          SizedBox(width: 10.w),
-          OutlinedButton.icon(
-            onPressed: hasData ? ctrl.copyContent : null,
-            icon: const Icon(Icons.copy_rounded, size: 16),
-            label: Text('copy'.tr, style: TextStyle(fontSize: 13.sp)),
-          ),
-          SizedBox(width: 10.w),
-          OutlinedButton(
-            onPressed: ctrl.clearForm,
-            child: const Icon(Icons.refresh_rounded, size: 18),
+          SizedBox(height: 10.h),
+          // Secondary actions row
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: hasData ? ctrl.copyContent : null,
+                  icon: Icon(Icons.copy_rounded, size: 16.r),
+                  label: Text(
+                    'copy'.tr,
+                    style: TextStyle(fontSize: 13.sp),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 10.w),
+              OutlinedButton(
+                onPressed: ctrl.clearForm,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: Icon(Icons.refresh_rounded, size: 18.r),
+              ),
+            ],
           ),
         ],
       );
@@ -453,7 +541,7 @@ class _ActionBar extends StatelessWidget {
   }
 }
 
-// ?????? Form Widgets ??????????????????????????????????????????????????????????????????????????????????
+// Form Widgets
 
 class _UrlForm extends StatelessWidget {
   final QrController ctrl;
@@ -631,7 +719,7 @@ class _EmailForm extends StatelessWidget {
   }
 }
 
-// ?????? Reusable Field Widget ????????????????????????????????????????????????????????????????
+// Reusable Field Widget
 
 class _Field extends StatelessWidget {
   final TextEditingController ctrl;
@@ -671,7 +759,7 @@ class _Field extends StatelessWidget {
   }
 }
 
-// ?????? Form Card ????????????????????????????????????????????????????????????????????????????????????????
+// Form Card
 
 class _FormCard extends StatelessWidget {
   final List<Widget> children;
