@@ -81,6 +81,11 @@ class QrController extends GetxController {
   // RepaintBoundary key for screenshot
   final qrKey = GlobalKey();
 
+  // Workers
+  late final Worker _workerQrType;
+  late final Worker _workerWifiSecurity;
+  late final Worker _workerWifiHidden;
+
   @override
   void onInit() {
     super.onInit();
@@ -100,13 +105,16 @@ class QrController extends GetxController {
     emailSubjectCtrl.addListener(_updateQrData);
     emailBodyCtrl.addListener(_updateQrData);
 
-    ever(qrType, (_) => _updateQrData());
-    ever(wifiSecurity, (_) => _updateQrData());
-    ever(wifiHidden, (_) => _updateQrData());
+    _workerQrType = ever(qrType, (_) => _updateQrData());
+    _workerWifiSecurity = ever(wifiSecurity, (_) => _updateQrData());
+    _workerWifiHidden = ever(wifiHidden, (_) => _updateQrData());
   }
 
   @override
   void onClose() {
+    _workerQrType.dispose();
+    _workerWifiSecurity.dispose();
+    _workerWifiHidden.dispose();
     urlCtrl.dispose();
     textCtrl.dispose();
     wifiSsidCtrl.dispose();
