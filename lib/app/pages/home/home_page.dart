@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import 'package:qr_code_generator/app/admob/ads_banner.dart';
@@ -19,80 +20,110 @@ class HomePage extends GetView<QrController> {
     final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              cs.primary.withValues(alpha: 0.12),
-              cs.surface,
-              cs.secondaryContainer.withValues(alpha: 0.16),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: cs.surface,
+        title: Row(
+          children: [
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.9, end: 1),
+              duration: const Duration(milliseconds: 680),
+              curve: Curves.easeOutBack,
+              builder: (context, value, child) =>
+                  Transform.scale(scale: value, child: child),
+              child: Text('📱', style: TextStyle(fontSize: 26.sp)),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              'app_name'.tr,
+              style: TextStyle(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(LucideIcons.history),
+            onPressed: () => _showHistorySheet(context),
+            tooltip: 'history'.tr,
+          ),
+          IconButton(
+            icon: const Icon(LucideIcons.bookOpen),
+            onPressed: () => Get.toNamed(Routes.GUIDE),
+            tooltip: 'guide'.tr,
+          ),
+          IconButton(
+            icon: const Icon(LucideIcons.settings),
+            onPressed: () => Get.toNamed(Routes.SETTINGS),
+            tooltip: 'settings'.tr,
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3),
+          child: Container(
+            height: 3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [cs.primary, cs.tertiary],
+              ),
+            ),
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
-                child: _Header(
-                  cs: cs,
-                  onHistory: () => _showHistorySheet(context),
-                  onGuide: () => Get.toNamed(Routes.GUIDE),
-                  onSettings: () => Get.toNamed(Routes.SETTINGS),
-                ),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Column(
+                children: [
+                  _TypeSelector(ctrl: controller),
+                  SizedBox(height: 14.h),
+                  Obx(() {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder: (child, anim) =>
+                          FadeTransition(opacity: anim, child: child),
+                      child: KeyedSubtree(
+                        key: ValueKey(controller.qrType.value),
+                        child: _buildForm(controller.qrType.value),
+                      ),
+                    );
+                  }),
+                  SizedBox(height: 18.h),
+                  _QrPreview(ctrl: controller),
+                  SizedBox(height: 16.h),
+                  _ColorPicker(ctrl: controller),
+                  SizedBox(height: 18.h),
+                  _ActionBar(ctrl: controller),
+                  SizedBox(height: 16.h),
+                ],
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-                  child: Column(
-                    children: [
-                      _TypeSelector(ctrl: controller),
-                      SizedBox(height: 14.h),
-                      Obx(() {
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder: (child, anim) =>
-                              FadeTransition(opacity: anim, child: child),
-                          child: KeyedSubtree(
-                            key: ValueKey(controller.qrType.value),
-                            child: _buildForm(controller.qrType.value),
-                          ),
-                        );
-                      }),
-                      SizedBox(height: 18.h),
-                      _QrPreview(ctrl: controller),
-                      SizedBox(height: 16.h),
-                      _ColorPicker(ctrl: controller),
-                      SizedBox(height: 18.h),
-                      _ActionBar(ctrl: controller),
-                      SizedBox(height: 16.h),
-                    ],
-                  ),
-                ),
-              ),
-              Container(
-                color: cs.surface.withValues(alpha: 0.9),
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 12.w,
-                      right: 12.w,
-                      top: 8.h,
-                      bottom: 10.h,
-                    ),
-                    child: BannerAdWidget(
-                      adUnitId: AdHelper.bannerAdUnitId,
-                      type: AdHelper.banner,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          Container(
+            color: cs.surface.withValues(alpha: 0.9),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 12.w,
+                  right: 12.w,
+                  top: 8.h,
+                  bottom: 10.h,
+                ),
+                child: BannerAdWidget(
+                  adUnitId: AdHelper.bannerAdUnitId,
+                  type: AdHelper.banner,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -116,57 +147,7 @@ class HomePage extends GetView<QrController> {
   }
 }
 
-class _Header extends StatelessWidget {
-  final ColorScheme cs;
-  final VoidCallback onHistory;
-  final VoidCallback onGuide;
-  final VoidCallback onSettings;
-
-  const _Header({
-    required this.cs,
-    required this.onHistory,
-    required this.onGuide,
-    required this.onSettings,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.9, end: 1),
-            duration: const Duration(milliseconds: 680),
-            curve: Curves.easeOutBack,
-            builder: (context, value, child) => Transform.scale(scale: value, child: child),
-            child: Text('📱', style: TextStyle(fontSize: 30.sp)),
-          ),
-          SizedBox(width: 10.w),
-          Text(
-            'app_name'.tr,
-            style: TextStyle(
-              fontSize: 24.sp,
-              fontWeight: FontWeight.w800,
-              color: cs.onSurface,
-            ),
-          ),
-          const Spacer(),
-          IconButton(icon: const Icon(Icons.history_rounded), onPressed: onHistory, tooltip: 'history'.tr),
-          IconButton(icon: const Icon(Icons.menu_book_rounded), onPressed: onGuide, tooltip: 'guide'.tr),
-          IconButton(icon: const Icon(Icons.settings), onPressed: onSettings, tooltip: 'settings'.tr),
-        ],
-      ),
-    );
-  }
-}
-
-// Type selector buttons — improved card style
+// Type selector buttons
 
 class _TypeSelector extends StatelessWidget {
   final QrController ctrl;
@@ -185,7 +166,7 @@ class _TypeSelector extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Obx(() {
       return SizedBox(
-        height: 72.h,
+        height: 76.h,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           itemCount: _types.length,
@@ -206,41 +187,49 @@ class _TypeSelector extends StatelessWidget {
                   gradient: selected
                       ? LinearGradient(
                           colors: [
-                            cs.primary.withValues(alpha: 0.18),
+                            cs.primary.withValues(alpha: 0.22),
                             cs.primaryContainer,
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         )
                       : null,
-                  color: selected ? null : cs.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(14.r),
+                  color: selected ? null : cs.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color: selected ? cs.primary : Colors.transparent,
-                    width: 2,
+                    color: selected
+                        ? cs.primary
+                        : cs.outlineVariant.withValues(alpha: 0.5),
+                    width: selected ? 2 : 1,
                   ),
                   boxShadow: selected
                       ? [
                           BoxShadow(
-                            color: cs.primary.withValues(alpha: 0.22),
-                            blurRadius: 10,
+                            color: cs.primary.withValues(alpha: 0.25),
+                            blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
                         ]
-                      : null,
+                      : [
+                          BoxShadow(
+                            color: cs.shadow.withValues(alpha: 0.06),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(icon, style: TextStyle(fontSize: 20.sp)),
-                    SizedBox(height: 3.h),
+                    SizedBox(height: 4.h),
                     Text(
                       label.tr,
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight:
                             selected ? FontWeight.w700 : FontWeight.w500,
-                        color: selected ? cs.primary : cs.onSurface,
+                        color: selected ? cs.primary : cs.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -269,11 +258,24 @@ class _QrPreview extends StatelessWidget {
       final bg = Color(ctrl.bgColor.value);
 
       return Container(
-        padding: EdgeInsets.all(16.r),
+        padding: EdgeInsets.all(18.r),
         decoration: BoxDecoration(
-          color: cs.surfaceContainerLow,
+          gradient: LinearGradient(
+            colors: [
+              cs.primaryContainer,
+              cs.secondaryContainer.withValues(alpha: 0.7),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: cs.outlineVariant),
+          boxShadow: [
+            BoxShadow(
+              color: cs.primary.withValues(alpha: 0.12),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -296,17 +298,20 @@ class _QrPreview extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.qr_code_2_rounded,
+                              LucideIcons.qrCode,
                               size: 64.r,
-                              color: cs.onSurfaceVariant.withValues(alpha: 0.4),
+                              color: cs.onPrimaryContainer
+                                  .withValues(alpha: 0.45),
                             ),
-                            SizedBox(height: 8.h),
+                            SizedBox(height: 10.h),
                             Text(
                               'fill_form'.tr,
                               style: TextStyle(
                                 fontSize: 13.sp,
-                                color: cs.onSurfaceVariant,
+                                color: cs.onPrimaryContainer
+                                    .withValues(alpha: 0.7),
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ],
                         ),
@@ -360,90 +365,208 @@ class _ColorPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Obx(() {
-      return Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'fg_color'.tr,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
+      return Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: cs.outlineVariant.withValues(alpha: 0.6),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: cs.shadow.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'fg_color'.tr,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                SizedBox(height: 6.h),
-                Row(
-                  children: QrController.fgColorOptions.map((c) {
-                    final selected = ctrl.fgColor.value == c;
-                    return GestureDetector(
-                      onTap: () => ctrl.fgColor.value = c,
-                      child: Container(
-                        width: 28.r,
-                        height: 28.r,
-                        margin: EdgeInsets.only(right: 6.w),
-                        decoration: BoxDecoration(
-                          color: Color(c),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: selected ? cs.primary : Colors.transparent,
-                            width: 3,
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: QrController.fgColorOptions.map((c) {
+                      final selected = ctrl.fgColor.value == c;
+                      return GestureDetector(
+                        onTap: () => ctrl.fgColor.value = c,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          width: 28.r,
+                          height: 28.r,
+                          margin: EdgeInsets.only(right: 6.w),
+                          decoration: BoxDecoration(
+                            color: Color(c),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: selected
+                                  ? cs.primary
+                                  : Colors.transparent,
+                              width: 3,
+                            ),
+                            boxShadow: selected
+                                ? [
+                                    BoxShadow(
+                                      color: cs.primary
+                                          .withValues(alpha: 0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'bg_color'.tr,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurfaceVariant,
+                      );
+                    }).toList(),
                   ),
-                ),
-                SizedBox(height: 6.h),
-                Row(
-                  children: QrController.bgColorOptions.map((c) {
-                    final selected = ctrl.bgColor.value == c;
-                    return GestureDetector(
-                      onTap: () => ctrl.bgColor.value = c,
-                      child: Container(
-                        width: 28.r,
-                        height: 28.r,
-                        margin: EdgeInsets.only(right: 6.w),
-                        decoration: BoxDecoration(
-                          color: Color(c),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: selected ? cs.primary : cs.outline,
-                            width: selected ? 3 : 1,
+                ],
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'bg_color'.tr,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: QrController.bgColorOptions.map((c) {
+                      final selected = ctrl.bgColor.value == c;
+                      return GestureDetector(
+                        onTap: () => ctrl.bgColor.value = c,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          width: 28.r,
+                          height: 28.r,
+                          margin: EdgeInsets.only(right: 6.w),
+                          decoration: BoxDecoration(
+                            color: Color(c),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: selected ? cs.primary : cs.outline,
+                              width: selected ? 3 : 1,
+                            ),
+                            boxShadow: selected
+                                ? [
+                                    BoxShadow(
+                                      color: cs.primary
+                                          .withValues(alpha: 0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     });
   }
 }
 
-// Action Bar — gradient Generate/Share button
+// Gradient CTA Button
+
+class _GradientButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onTap;
+  final bool enabled;
+
+  const _GradientButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Get.theme.colorScheme;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: enabled
+            ? LinearGradient(
+                colors: [cs.primary, cs.tertiary],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              )
+            : null,
+        color: enabled ? null : cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: enabled
+            ? [
+                BoxShadow(
+                  color: cs.primary.withValues(alpha: 0.35),
+                  blurRadius: 14,
+                  offset: const Offset(0, 5),
+                ),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16.r),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 22.r,
+                  color: enabled
+                      ? cs.onPrimary
+                      : cs.onSurface.withValues(alpha: 0.4),
+                ),
+                SizedBox(width: 10.w),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.bold,
+                    color: enabled
+                        ? cs.onPrimary
+                        : cs.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Action Bar
 
 class _ActionBar extends StatelessWidget {
   final QrController ctrl;
@@ -456,71 +579,19 @@ class _ActionBar extends StatelessWidget {
       final hasData = ctrl.qrData.value.isNotEmpty;
       return Column(
         children: [
-          // Gradient CTA share button
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: hasData
-                  ? LinearGradient(
-                      colors: [cs.primary, cs.tertiary],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    )
-                  : null,
-              color: hasData ? null : cs.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(16.r),
-              boxShadow: hasData
-                  ? [
-                      BoxShadow(
-                        color: cs.primary.withValues(alpha: 0.35),
-                        blurRadius: 14,
-                        offset: const Offset(0, 5),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16.r),
-                onTap: hasData ? ctrl.shareQr : null,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 15.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.share_rounded,
-                        size: 22.r,
-                        color: hasData
-                            ? cs.onPrimary
-                            : cs.onSurface.withValues(alpha: 0.4),
-                      ),
-                      SizedBox(width: 10.w),
-                      Text(
-                        'share'.tr,
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          fontWeight: FontWeight.bold,
-                          color: hasData
-                              ? cs.onPrimary
-                              : cs.onSurface.withValues(alpha: 0.4),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+          _GradientButton(
+            label: 'share'.tr,
+            icon: LucideIcons.share2,
+            onTap: hasData ? ctrl.shareQr : null,
+            enabled: hasData,
           ),
           SizedBox(height: 10.h),
-          // Secondary actions row
           Row(
             children: [
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: hasData ? ctrl.copyContent : null,
-                  icon: Icon(Icons.copy_rounded, size: 16.r),
+                  icon: Icon(LucideIcons.copy, size: 16.r),
                   label: Text(
                     'copy'.tr,
                     style: TextStyle(fontSize: 13.sp),
@@ -536,13 +607,14 @@ class _ActionBar extends StatelessWidget {
               SizedBox(width: 10.w),
               OutlinedButton.icon(
                 onPressed: hasData ? ctrl.saveToGallery : null,
-                icon: Icon(Icons.save_alt_rounded, size: 16.r),
+                icon: Icon(LucideIcons.download, size: 16.r),
                 label: Text(
                   'save'.tr,
                   style: TextStyle(fontSize: 13.sp),
                 ),
                 style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 14.w),
+                  padding: EdgeInsets.symmetric(
+                      vertical: 12.h, horizontal: 14.w),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                   ),
@@ -552,12 +624,16 @@ class _ActionBar extends StatelessWidget {
               OutlinedButton(
                 onPressed: ctrl.clearForm,
                 style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                  padding: EdgeInsets.symmetric(
+                      vertical: 12.h, horizontal: 16.w),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                   ),
+                  foregroundColor: cs.error,
+                  side: BorderSide(
+                      color: cs.error.withValues(alpha: 0.5)),
                 ),
-                child: Icon(Icons.refresh_rounded, size: 18.r),
+                child: Icon(LucideIcons.rotateCcw, size: 18.r),
               ),
             ],
           ),
@@ -581,7 +657,7 @@ class _UrlForm extends StatelessWidget {
           ctrl: ctrl.urlCtrl,
           label: 'url_label'.tr,
           hint: 'url_hint'.tr,
-          icon: Icons.link_rounded,
+          icon: LucideIcons.link,
           keyboard: TextInputType.url,
         ),
       ],
@@ -601,7 +677,7 @@ class _TextForm extends StatelessWidget {
           ctrl: ctrl.textCtrl,
           label: 'text_label'.tr,
           hint: 'text_hint'.tr,
-          icon: Icons.text_fields_rounded,
+          icon: LucideIcons.type,
           maxLines: 4,
         ),
       ],
@@ -622,14 +698,14 @@ class _WifiForm extends StatelessWidget {
           ctrl: ctrl.wifiSsidCtrl,
           label: 'wifi_ssid'.tr,
           hint: 'wifi_ssid_hint'.tr,
-          icon: Icons.wifi_rounded,
+          icon: LucideIcons.wifi,
         ),
         SizedBox(height: 12.h),
         _Field(
           ctrl: ctrl.wifiPasswordCtrl,
           label: 'wifi_password'.tr,
           hint: 'wifi_password_hint'.tr,
-          icon: Icons.lock_rounded,
+          icon: LucideIcons.lock,
           obscure: true,
         ),
         SizedBox(height: 12.h),
@@ -680,14 +756,14 @@ class _ContactForm extends StatelessWidget {
           ctrl: ctrl.contactNameCtrl,
           label: 'contact_name'.tr,
           hint: 'contact_name_hint'.tr,
-          icon: Icons.person_rounded,
+          icon: LucideIcons.user,
         ),
         SizedBox(height: 12.h),
         _Field(
           ctrl: ctrl.contactPhoneCtrl,
           label: 'contact_phone'.tr,
           hint: 'contact_phone_hint'.tr,
-          icon: Icons.phone_rounded,
+          icon: LucideIcons.phone,
           keyboard: TextInputType.phone,
         ),
         SizedBox(height: 12.h),
@@ -695,7 +771,7 @@ class _ContactForm extends StatelessWidget {
           ctrl: ctrl.contactEmailCtrl,
           label: 'contact_email'.tr,
           hint: 'contact_email_hint'.tr,
-          icon: Icons.email_rounded,
+          icon: LucideIcons.mail,
           keyboard: TextInputType.emailAddress,
         ),
         SizedBox(height: 12.h),
@@ -703,7 +779,7 @@ class _ContactForm extends StatelessWidget {
           ctrl: ctrl.contactOrgCtrl,
           label: 'contact_org'.tr,
           hint: 'contact_org_hint'.tr,
-          icon: Icons.business_rounded,
+          icon: LucideIcons.building2,
         ),
       ],
     );
@@ -722,7 +798,7 @@ class _EmailForm extends StatelessWidget {
           ctrl: ctrl.emailAddressCtrl,
           label: 'email_to'.tr,
           hint: 'email_address_hint'.tr,
-          icon: Icons.email_rounded,
+          icon: LucideIcons.mail,
           keyboard: TextInputType.emailAddress,
         ),
         SizedBox(height: 12.h),
@@ -730,14 +806,14 @@ class _EmailForm extends StatelessWidget {
           ctrl: ctrl.emailSubjectCtrl,
           label: 'email_subject'.tr,
           hint: 'email_subject_hint'.tr,
-          icon: Icons.subject_rounded,
+          icon: LucideIcons.fileText,
         ),
         SizedBox(height: 12.h),
         _Field(
           ctrl: ctrl.emailBodyCtrl,
           label: 'email_body'.tr,
           hint: 'email_body_hint'.tr,
-          icon: Icons.message_rounded,
+          icon: LucideIcons.messageSquare,
           maxLines: 3,
         ),
       ],
@@ -777,7 +853,8 @@ class _Field extends StatelessWidget {
         labelText: label,
         hintText: hint,
         prefixIcon: Icon(icon, size: 18.r),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r)),
+        border:
+            OutlineInputBorder(borderRadius: BorderRadius.circular(10.r)),
         contentPadding:
             EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       ),
@@ -798,8 +875,17 @@ class _FormCard extends StatelessWidget {
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: cs.outlineVariant),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.6),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cs.shadow.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -845,7 +931,8 @@ class _HistorySheet extends StatelessWidget {
             children: [
               Text(
                 'history'.tr,
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
+                style:
+                    TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800),
               ),
               const Spacer(),
               Obx(() {
@@ -869,15 +956,31 @@ class _HistorySheet extends StatelessWidget {
             if (isUnlimited) return const SizedBox.shrink();
             return Container(
               margin: EdgeInsets.only(bottom: 10.h),
-              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              padding:
+                  EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: cs.primaryContainer.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: cs.primary.withValues(alpha: 0.3)),
+                gradient: LinearGradient(
+                  colors: [
+                    cs.primaryContainer,
+                    cs.secondaryContainer.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14.r),
+                border: Border.all(
+                    color: cs.primary.withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: cs.primary.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
-                  Icon(Icons.history_rounded, size: 18.r, color: cs.primary),
+                  Icon(LucideIcons.history, size: 18.r, color: cs.primary),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Column(
@@ -896,7 +999,8 @@ class _HistorySheet extends StatelessWidget {
                             'history_limit_full'.tr,
                             style: TextStyle(
                               fontSize: 11.sp,
-                              color: cs.onPrimaryContainer.withValues(alpha: 0.8),
+                              color: cs.onPrimaryContainer
+                                  .withValues(alpha: 0.8),
                             ),
                           ),
                       ],
@@ -906,12 +1010,13 @@ class _HistorySheet extends StatelessWidget {
                   FilledButton.tonal(
                     onPressed: ctrl.unlockUnlimitedHistory,
                     style: FilledButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 10.w, vertical: 6.h),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.play_circle_outline_rounded, size: 14.r),
+                        Icon(LucideIcons.circlePlay, size: 14.r),
                         SizedBox(width: 4.w),
                         Text(
                           'history_unlock_btn'.tr,
@@ -942,7 +1047,8 @@ class _HistorySheet extends StatelessWidget {
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: ctrl.history.length,
-                separatorBuilder: (context, index) => const Divider(height: 1),
+                separatorBuilder: (context, index) =>
+                    const Divider(height: 1),
                 itemBuilder: (ctx, i) {
                   final entry = ctrl.history[i];
                   final type = entry['type'] ?? 'url';
@@ -966,7 +1072,8 @@ class _HistorySheet extends StatelessWidget {
                       ),
                     ),
                     trailing: IconButton(
-                      icon: Icon(Icons.delete_rounded, color: cs.error, size: 18.r),
+                      icon: Icon(LucideIcons.trash2,
+                          color: cs.error, size: 18.r),
                       onPressed: () => ctrl.deleteHistory(i),
                     ),
                     onTap: () {
