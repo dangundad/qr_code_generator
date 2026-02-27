@@ -1,6 +1,7 @@
 ﻿import 'package:get/get.dart';
 
 import 'package:qr_code_generator/app/controllers/qr_controller.dart';
+import 'package:qr_code_generator/app/services/app_rating_service.dart';
 import 'package:qr_code_generator/app/controllers/setting_controller.dart';
 import 'package:qr_code_generator/app/services/hive_service.dart';
 import 'package:qr_code_generator/app/services/activity_log_service.dart';
@@ -43,6 +44,10 @@ class AppBinding implements Bindings {
 
     if (!Get.isRegistered<StatsController>()) {
       Get.lazyPut(() => StatsController());
+    }
+
+    if (!Get.isRegistered<AppRatingService>()) {
+      Get.put(AppRatingService(), permanent: true);
     }
   }
 }
