@@ -16,8 +16,8 @@ class HomePage extends GetView<QrController> {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  Widget build(BuildContext _) {
+    final cs = Get.theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -48,7 +48,7 @@ class HomePage extends GetView<QrController> {
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.history),
-            onPressed: () => _showHistorySheet(context),
+            onPressed: () => _showHistorySheet(),
             tooltip: 'history'.tr,
           ),
           IconButton(
@@ -138,7 +138,7 @@ class HomePage extends GetView<QrController> {
     };
   }
 
-  void _showHistorySheet(BuildContext context) {
+  void _showHistorySheet() {
     Get.bottomSheet(
       _HistorySheet(ctrl: controller),
       isScrollControlled: true,
@@ -162,8 +162,8 @@ class _TypeSelector extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  Widget build(BuildContext _) {
+    final cs = Get.theme.colorScheme;
     return Obx(() {
       return SizedBox(
         height: 76.h,
@@ -250,8 +250,8 @@ class _QrPreview extends StatelessWidget {
   const _QrPreview({required this.ctrl});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  Widget build(BuildContext _) {
+    final cs = Get.theme.colorScheme;
     return Obx(() {
       final data = ctrl.qrData.value;
       final fg = Color(ctrl.fgColor.value);
@@ -362,8 +362,8 @@ class _ColorPicker extends StatelessWidget {
   const _ColorPicker({required this.ctrl});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  Widget build(BuildContext _) {
+    final cs = Get.theme.colorScheme;
     return Obx(() {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -573,8 +573,8 @@ class _ActionBar extends StatelessWidget {
   const _ActionBar({required this.ctrl});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  Widget build(BuildContext _) {
+    final cs = Get.theme.colorScheme;
     return Obx(() {
       final hasData = ctrl.qrData.value.isNotEmpty;
       return Column(
@@ -690,8 +690,8 @@ class _WifiForm extends StatelessWidget {
   const _WifiForm({required this.ctrl});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  Widget build(BuildContext _) {
+    final cs = Get.theme.colorScheme;
     return _FormCard(
       children: [
         _Field(
@@ -869,8 +869,8 @@ class _FormCard extends StatelessWidget {
   const _FormCard({required this.children});
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+  Widget build(BuildContext _) {
+    final cs = Get.theme.colorScheme;
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
@@ -903,7 +903,7 @@ class _HistorySheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final cs = Get.theme.colorScheme;
     return Container(
       decoration: BoxDecoration(
         color: cs.surface,

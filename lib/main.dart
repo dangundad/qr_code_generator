@@ -20,7 +20,7 @@ import 'package:qr_code_generator/app/admob/ads_rewarded.dart';
 import 'package:qr_code_generator/app/bindings/app_binding.dart';
 import 'package:qr_code_generator/app/routes/app_pages.dart';
 import 'package:qr_code_generator/app/services/hive_service.dart';
-import 'package:qr_code_generator/app/theme/app_theme.dart';
+import 'package:qr_code_generator/app/theme/app_flex_theme.dart';
 import 'package:qr_code_generator/app/translate/translate.dart';
 
 Future<void> main() async {
@@ -86,8 +86,8 @@ class QrCodeGeneratorApp extends StatelessWidget {
       fallbackLocale: const Locale('en'),
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.system,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
+      theme: AppFlexTheme.light,
+      darkTheme: AppFlexTheme.dark,
       home: const Scaffold(body: SizedBox.shrink()),
     );
   }
@@ -117,8 +117,8 @@ class QrCodeGeneratorApp extends StatelessWidget {
           defaultTransition: Transition.fadeIn,
           initialBinding: AppBinding(),
           themeMode: ThemeMode.system,
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
+          theme: AppFlexTheme.light,
+          darkTheme: AppFlexTheme.dark,
           scrollBehavior: ScrollBehavior().copyWith(overscroll: false),
           navigatorKey: Get.key,
           getPages: AppPages.routes,
