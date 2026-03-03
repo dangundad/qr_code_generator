@@ -130,6 +130,8 @@ class Languages extends Translations {
       'restore_error': 'Restore failed. Please try again.',
       'purchase_success': 'Purchase Completed',
       'premium_ready': 'Premium is now active.',
+      'dev_premium_on': '[DEV] Premium OFF → ON',
+      'dev_premium_off': '[DEV] Premium ON → OFF',
       'go_premium': 'Go Premium',
       'go_premium_subtitle': 'Unlock all paid features',
 
@@ -254,6 +256,8 @@ class Languages extends Translations {
       'purchase_failed': '구매에 실패했습니다. 다시 시도해 주세요.',
       'restore_error': '복원에 실패했습니다. 다시 시도해 주세요.',
       'purchase_success': '구매 완료',
+      'dev_premium_on': '[DEV] 프리미엄 OFF → ON',
+      'dev_premium_off': '[DEV] 프리미엄 ON → OFF',
       'go_premium': '프리미엄 시작',
       'go_premium_subtitle': '유료 기능 모두 잠금 해제',
 

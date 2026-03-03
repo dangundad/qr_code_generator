@@ -1,6 +1,7 @@
 ﻿import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:qr_code_generator/app/admob/ads_interstitial.dart';
@@ -16,6 +17,7 @@ class PurchaseService extends GetxService {
 
   final RxBool available = false.obs;
   final RxBool isPremium = false.obs;
+  final RxBool isDevPremium = false.obs;
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString statusMessage = ''.obs;
@@ -112,6 +114,26 @@ class PurchaseService extends GetxService {
   String getProductPrice(int index, String fallback) {
     final product = getProductByIndex(index);
     return product?.price ?? fallback;
+  }
+
+  bool get hasActivePremium => isPremium.value || isDevPremium.value;
+
+  String get premiumPriceWithFallback {
+    final id = PurchaseConstants.ANDROID_PRODUCT_IDS.isNotEmpty
+        ? PurchaseConstants.ANDROID_PRODUCT_IDS[0]
+        : null;
+    final price = id != null
+        ? products.firstWhereOrNull((p) => p.id == id)?.price
+        : null;
+    return price ?? r'$2.99';
+  }
+
+  void toggleDevPremium() {
+    if (kDebugMode) {
+      isDevPremium.value = !isDevPremium.value;
+      unawaited(_syncAdsForPremiumStatus(hasActivePremium));
+      Get.log('Dev premium: ${isDevPremium.value}');
+    }
   }
 
   Future<void> purchaseProduct(int index) async {
