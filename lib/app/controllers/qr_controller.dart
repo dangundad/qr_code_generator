@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
 import 'package:gal/gal.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 
 import 'package:qr_code_generator/app/admob/ads_rewarded.dart';
+import 'package:qr_code_generator/app/controllers/setting_controller.dart';
 import 'package:qr_code_generator/app/data/enums/qr_type.dart';
 import 'package:qr_code_generator/app/services/hive_service.dart';
 
@@ -81,6 +83,8 @@ class QrController extends GetxController {
   // RepaintBoundary key for screenshot
   final qrKey = GlobalKey();
 
+  bool _hasVibrator = false;
+
   // Workers
   late final Worker _workerQrType;
   late final Worker _workerWifiSecurity;
@@ -89,6 +93,7 @@ class QrController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    Vibration.hasVibrator().then((v) => _hasVibrator = v);
     _loadHistoryLimit();
     _loadHistory();
 
@@ -132,9 +137,17 @@ class QrController extends GetxController {
   void _updateQrData() {
     final newData = _buildQrString();
     if (newData.isNotEmpty && qrData.value != newData) {
-      HapticFeedback.lightImpact();
+      _haptic();
     }
     qrData.value = newData;
+  }
+
+  void _haptic() {
+    if (Get.isRegistered<SettingController>() &&
+        !SettingController.to.hapticEnabled.value) {
+      return;
+    }
+    if (_hasVibrator) Vibration.vibrate(duration: 50);
   }
 
   String _buildQrString() {
@@ -156,7 +169,12 @@ class QrController extends GetxController {
         final pass = wifiPasswordCtrl.text;
         final sec = wifiSecurity.value;
         final hidden = wifiHidden.value ? 'H:true;' : '';
-        return 'WIFI:T:$sec;S:$ssid;P:$pass;$hidden;';
+        final escapedSsid = _escapeWifiField(ssid);
+        final escapedPass = _escapeWifiField(pass);
+        if (sec == 'nopass') {
+          return 'WIFI:T:nopass;S:$escapedSsid;P:;$hidden;';
+        }
+        return 'WIFI:T:$sec;S:$escapedSsid;P:$escapedPass;$hidden;';
 
       case QrType.contact:
         final name = contactNameCtrl.text.trim();
@@ -165,21 +183,40 @@ class QrController extends GetxController {
         final email = contactEmailCtrl.text.trim();
         final org = contactOrgCtrl.text.trim();
         final buf = StringBuffer();
-        buf.write('BEGIN:VCARD\nVERSION:3.0\n');
-        buf.write('FN:$name\n');
-        if (phone.isNotEmpty) buf.write('TEL:$phone\n');
-        if (email.isNotEmpty) buf.write('EMAIL:$email\n');
-        if (org.isNotEmpty) buf.write('ORG:$org\n');
+        buf.write('BEGIN:VCARD\r\nVERSION:3.0\r\n');
+        // N field required by vCard 3.0: Family;Given;Additional;Prefix;Suffix
+        final nameParts = name.split(' ');
+        final given = nameParts.first;
+        final family = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        buf.write('N:$family;$given;;;\r\n');
+        buf.write('FN:$name\r\n');
+        if (phone.isNotEmpty) buf.write('TEL;TYPE=CELL:$phone\r\n');
+        if (email.isNotEmpty) buf.write('EMAIL;TYPE=INTERNET:$email\r\n');
+        if (org.isNotEmpty) buf.write('ORG:$org\r\n');
         buf.write('END:VCARD');
         return buf.toString();
 
       case QrType.email:
         final addr = emailAddressCtrl.text.trim();
         if (addr.isEmpty) return '';
-        final sub = Uri.encodeComponent(emailSubjectCtrl.text.trim());
-        final body = Uri.encodeComponent(emailBodyCtrl.text.trim());
-        return 'mailto:$addr?subject=$sub&body=$body';
+        final sub = emailSubjectCtrl.text.trim();
+        final body = emailBodyCtrl.text.trim();
+        final params = <String>[];
+        if (sub.isNotEmpty) params.add('subject=${Uri.encodeComponent(sub)}');
+        if (body.isNotEmpty) params.add('body=${Uri.encodeComponent(body)}');
+        if (params.isEmpty) return 'mailto:$addr';
+        return 'mailto:$addr?${params.join('&')}';
     }
+  }
+
+  /// Escapes special characters in Wi-Fi QR fields per the spec:
+  /// backslash, semicolon, comma, double-quote must be escaped with \
+  String _escapeWifiField(String value) {
+    return value
+        .replaceAll(r'\', r'\\')
+        .replaceAll(';', r'\;')
+        .replaceAll(',', r'\,')
+        .replaceAll('"', r'\"');
   }
 
   // ─── Share / Save ──────────────────────────────
@@ -198,7 +235,7 @@ class QrController extends GetxController {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
       final bytes = byteData.buffer.asUint8List();
-      HapticFeedback.lightImpact();
+      _haptic();
       await _shareImageBytes(bytes);
       _addToHistory();
     } catch (e) {
@@ -230,7 +267,7 @@ class QrController extends GetxController {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) return;
       final bytes = byteData.buffer.asUint8List();
-      HapticFeedback.lightImpact();
+      _haptic();
       final hasAccess = await Gal.hasAccess(toAlbum: true);
       if (!hasAccess) {
         final granted = await Gal.requestAccess(toAlbum: true);
@@ -249,7 +286,8 @@ class QrController extends GetxController {
 
   void copyContent() {
     if (qrData.value.isEmpty) return;
-    HapticFeedback.lightImpact();
+    _haptic();
+    Clipboard.setData(ClipboardData(text: qrData.value));
     Get.snackbar('copied'.tr, qrData.value,
         snackPosition: SnackPosition.BOTTOM,
         duration: const Duration(seconds: 2));

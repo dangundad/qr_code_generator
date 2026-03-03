@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:vibration/vibration.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -176,7 +176,9 @@ class _TypeSelector extends StatelessWidget {
             final selected = ctrl.qrType.value == type;
             return GestureDetector(
               onTap: () {
-                HapticFeedback.selectionClick();
+                Vibration.hasVibrator().then((v) {
+                  if (v) Vibration.vibrate(duration: 30);
+                });
                 ctrl.qrType.value = type;
                 ctrl.clearForm();
               },
