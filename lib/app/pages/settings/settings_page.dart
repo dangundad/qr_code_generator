@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:qr_code_generator/app/controllers/setting_controller.dart';
 import 'package:qr_code_generator/app/routes/app_pages.dart';
@@ -19,6 +20,9 @@ class SettingsPage extends GetView<SettingController> {
 
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: Get.theme.colorScheme.surface,
         title: Text(_loc('settings', 'Settings')),
         actions: [
           IconButton(
@@ -32,6 +36,20 @@ class SettingsPage extends GetView<SettingController> {
             onPressed: () => _openStats(),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3),
+          child: Container(
+            height: 3,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Get.theme.colorScheme.primary,
+                  Get.theme.colorScheme.tertiary,
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: Obx(
@@ -220,24 +238,102 @@ class SettingsPage extends GetView<SettingController> {
   }
 
   Future<void> _clearData(BuildContext context) async {
-    final colorScheme = Get.theme.colorScheme;
-    final shouldClear = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(_loc('clear_data', 'Clear local data')),
-        content: Text(
-          _loc('clear_data_confirm', 'This removes all local settings and logs. Continue?'),
+    final cs = Get.theme.colorScheme;
+    bool? shouldClear;
+
+    await Get.dialog<void>(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [cs.errorContainer, cs.error.withValues(alpha: 0.3)],
+                ),
+              ),
+              child: Center(
+                child: Container(
+                  width: 52.r,
+                  height: 52.r,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: cs.error.withValues(alpha: 0.15),
+                  ),
+                  child: Icon(LucideIcons.trash2, size: 26.r, color: cs.error),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 8.h),
+              child: Column(
+                children: [
+                  Text(
+                    _loc('clear_data', 'Clear local data'),
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    _loc('clear_data_confirm', 'This removes all local settings and logs. Continue?'),
+                    style: TextStyle(fontSize: 14.sp, color: cs.onSurfaceVariant),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        shouldClear = false;
+                        Get.back();
+                      },
+                      child: Text(_loc('cancel', 'Cancel')),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: [cs.error, cs.errorContainer]),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12.r),
+                          onTap: () {
+                            shouldClear = true;
+                            Get.back();
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            child: Center(
+                              child: Text(
+                                _loc('confirm', 'Confirm'),
+                                style: TextStyle(
+                                  color: cs.onError,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(_loc('cancel', 'Cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(_loc('confirm', 'Confirm')),
-          ),
-        ],
       ),
     );
 
@@ -253,8 +349,8 @@ class SettingsPage extends GetView<SettingController> {
       _loc('clear_data', 'Clear local data'),
       _loc('clear_data_complete', 'All local data has been reset.'),
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: colorScheme.surfaceContainerHigh,
-      colorText: colorScheme.onSurface,
+      backgroundColor: cs.surfaceContainerHigh,
+      colorText: cs.onSurface,
       duration: const Duration(seconds: 2),
     );
   }
