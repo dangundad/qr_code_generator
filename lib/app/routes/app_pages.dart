@@ -2,7 +2,6 @@
 // DangunDad Flutter App - app_pages.dart Template
 // ================================================
 // qr_code_generator 燁살꼹????????
-// mbti_pro ?袁⑥쨮?類ㅻ????쉘 疫꿸퀡而?(part ???쉘)
 // ignore_for_file: constant_identifier_names
 // import 'package:qr_code_generator/app/pages/settings/settings_page.dart';
 
@@ -35,7 +34,6 @@ class AppPages {
     //     Get.lazyPut(() => SettingController());
     //   }),
     // ),
-    // ---- ?源낇???륁뵠筌왖 ?곕떽? ----
     GetPage(name: _Paths.SETTINGS, page: () => const SettingsPage()),
     GetPage(name: _Paths.HISTORY, page: () => const HistoryPage()),
     GetPage(name: _Paths.STATS, page: () => const StatsPage()),
