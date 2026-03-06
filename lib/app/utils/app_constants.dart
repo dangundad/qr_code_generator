@@ -1,4 +1,4 @@
-﻿// ================================================
+// ================================================
 // DangunDad Flutter App - app_constants.dart Template
 // ================================================
 
@@ -17,7 +17,8 @@ abstract class AppUrls {
 
   static const String PACKAGE_NAME = 'com.dangundad.qrcodegenerator';
 
-  // static const String PRIVACY_POLICY = 'https://...';
+  static const String PRIVACY_POLICY =
+      'https://dangundad.github.io/privacy/qr-code-generator';
 }
 
 /// 개발자 정보

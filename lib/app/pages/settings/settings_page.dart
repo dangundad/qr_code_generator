@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:qr_code_generator/app/controllers/setting_controller.dart';
 import 'package:qr_code_generator/app/routes/app_pages.dart';
+import 'package:qr_code_generator/app/utils/app_toast.dart';
 
 class SettingsPage extends GetView<SettingController> {
   const SettingsPage({super.key});
@@ -78,7 +79,10 @@ class SettingsPage extends GetView<SettingController> {
                   _buildSwitchTile(
                     icon: Icons.privacy_tip,
                     title: _loc('ads_consent', 'Advertising consent'),
-                    subtitle: _loc('ads_consent_desc', 'Use ad personalization preference'),
+                    subtitle: _loc(
+                      'ads_consent_desc',
+                      'Use ad personalization preference',
+                    ),
                     value: controller.adsConsent.value,
                     onChanged: controller.setAdsConsent,
                   ),
@@ -114,9 +118,61 @@ class SettingsPage extends GetView<SettingController> {
                   ListTile(
                     leading: const Icon(Icons.auto_awesome),
                     title: Text(_loc('premium_title', 'Premium')),
-                    subtitle: Text(_loc('premium_subtitle', 'Unlock premium features and remove ads')),
+                    subtitle: Text(
+                      _loc(
+                        'premium_subtitle',
+                        'Unlock premium features and remove ads',
+                      ),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => Get.toNamed(Routes.PREMIUM),
+                  ),
+                ],
+              ),
+              SizedBox(height: 14.h),
+              _group(
+                colorScheme: colorScheme,
+                icon: Icons.support_agent,
+                title: _loc('support', 'Support'),
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.star_border),
+                    title: Text(_loc('rate_app', 'Rate App')),
+                    subtitle: Text(
+                      _loc('help_rate_app', 'Leave a rating on the store.'),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: controller.rateApp,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.send_outlined),
+                    title: Text(_loc('send_feedback', 'Send Feedback')),
+                    subtitle: Text(
+                      _loc(
+                        'help_send_feedback',
+                        'Share your ideas and report issues.',
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: controller.sendFeedback,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.privacy_tip_outlined),
+                    title: Text(_loc('privacy_policy', 'Privacy Policy')),
+                    subtitle: Text(
+                      _loc('help_privacy', 'Review how user data is handled.'),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: controller.openPrivacyPolicy,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.apps_outlined),
+                    title: Text(_loc('more_apps', 'More Apps')),
+                    subtitle: Text(
+                      _loc('help_more_apps', 'See more apps from DangunDad.'),
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: controller.openMoreApps,
                   ),
                 ],
               ),
@@ -129,7 +185,12 @@ class SettingsPage extends GetView<SettingController> {
                   ListTile(
                     leading: const Icon(Icons.delete_outline),
                     title: Text(_loc('clear_data', 'Clear local data')),
-                    subtitle: Text(_loc('clear_data_desc', 'Reset sound, haptic, consent, language and history logs.')),
+                    subtitle: Text(
+                      _loc(
+                        'clear_data_desc',
+                        'Reset sound, haptic, consent, language and history logs.',
+                      ),
+                    ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _clearData(context),
                   ),
@@ -243,7 +304,9 @@ class SettingsPage extends GetView<SettingController> {
 
     await Get.dialog<void>(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28.r),
+        ),
         clipBehavior: Clip.antiAlias,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -274,12 +337,21 @@ class SettingsPage extends GetView<SettingController> {
                 children: [
                   Text(
                     _loc('clear_data', 'Clear local data'),
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    _loc('clear_data_confirm', 'This removes all local settings and logs. Continue?'),
-                    style: TextStyle(fontSize: 14.sp, color: cs.onSurfaceVariant),
+                    _loc(
+                      'clear_data_confirm',
+                      'This removes all local settings and logs. Continue?',
+                    ),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: cs.onSurfaceVariant,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -302,7 +374,9 @@ class SettingsPage extends GetView<SettingController> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [cs.error, cs.errorContainer]),
+                        gradient: LinearGradient(
+                          colors: [cs.error, cs.errorContainer],
+                        ),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Material(
@@ -345,13 +419,14 @@ class SettingsPage extends GetView<SettingController> {
       'settings',
       metadata: {'action': 'clear_local_data'},
     );
-    Get.snackbar(
-      _loc('clear_data', 'Clear local data'),
-      _loc('clear_data_complete', 'All local data has been reset.'),
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: cs.surfaceContainerHigh,
-      colorText: cs.onSurface,
-      duration: const Duration(seconds: 2),
+    AppToast.show(
+      AppToastMessage.success(
+        title: _loc('clear_data', 'Clear local data'),
+        description: _loc(
+          'clear_data_complete',
+          'All local data has been reset.',
+        ),
+      ),
     );
   }
 }
@@ -360,5 +435,3 @@ String _loc(String key, String fallback) {
   final translated = key.tr;
   return translated == key ? fallback : translated;
 }
-
-

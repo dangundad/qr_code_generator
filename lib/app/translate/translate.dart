@@ -1,11 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class Languages extends Translations {
-  static const List<Locale> supportedLocales = [
-    Locale('en'),
-    Locale('ko'),
-  ];
+  static const List<Locale> supportedLocales = [Locale('en'), Locale('ko')];
 
   @override
   Map<String, Map<String, String>> get keys => {
@@ -49,6 +46,15 @@ class Languages extends Translations {
 
       'send_feedback': 'Send Feedback',
       'more_apps': 'More Apps',
+      'rate_app': 'Rate App',
+      'privacy_policy': 'Privacy Policy',
+      'support': 'Support',
+      'help_rate_app': 'Leave a rating on the store.',
+      'help_send_feedback': 'Share your ideas and report issues.',
+      'help_privacy': 'Review how user data is handled.',
+      'help_more_apps': 'See more apps from DangunDad.',
+      'feedback_email_subject': 'QR Generator Feedback',
+      'link_open_error': 'This link could not be opened right now.',
       'app_name': 'QR Generator',
       'fill_form': 'Fill in the form to generate a QR code',
       'qr_empty_error': 'Please fill in the required fields first',
@@ -108,7 +114,8 @@ class Languages extends Translations {
       'unique_screens': 'Screens',
       'top_events': 'Top events',
       'premium_title': 'Premium',
-      'premium_subtitle': 'Unlock all content, remove ads, and use all premium features.',
+      'premium_subtitle':
+          'Unlock all content, remove ads, and use all premium features.',
       'premium_benefits': 'Premium Benefits',
       'premium_benefit_remove_ads': 'No Ads',
       'premium_benefit_unlimited': 'Unlock all features',
@@ -123,7 +130,8 @@ class Languages extends Translations {
       'premium_purchase': 'Purchase Premium',
       'premium_restore': 'Restore Purchase',
       'premium_owned': 'Premium is active',
-      'premium_purchase_note': 'The purchase will be restored automatically when you restart the app.',
+      'premium_purchase_note':
+          'The purchase will be restored automatically when you restart the app.',
       'purchase_error': 'Purchase Error',
       'purchase_unavailable': 'In-app purchases are unavailable',
       'purchase_failed': 'Purchase failed. Please try again.',
@@ -141,6 +149,7 @@ class Languages extends Translations {
       'history_unlock_btn': 'Expand',
       'history_unlocked_title': 'Unlocked!',
       'history_unlocked_desc': 'History is now unlimited.',
+      'clear_data_complete': 'All local data has been reset.',
     },
     'ko': {
       'stats': '통계',
@@ -179,6 +188,15 @@ class Languages extends Translations {
       'qr_type_email': '이메일',
       'send_feedback': '피드백 보내기',
       'more_apps': '더 많은 앱',
+      'rate_app': '앱 평가',
+      'privacy_policy': '개인정보처리방침',
+      'support': '지원',
+      'help_rate_app': '스토어에서 앱을 평가해 주세요.',
+      'help_send_feedback': '아이디어나 문제를 알려주세요.',
+      'help_privacy': '사용자 데이터 처리 방식을 확인하세요.',
+      'help_more_apps': 'DangunDad의 다른 앱을 확인해 보세요.',
+      'feedback_email_subject': 'QR Generator 피드백',
+      'link_open_error': '지금은 이 링크를 열 수 없습니다.',
       'app_name': 'QR 생성기',
       'fill_form': '양식을 작성하여 QR 코드를 생성하세요',
       'qr_empty_error': '필수 항목을 먼저 입력해주세요',
@@ -231,6 +249,7 @@ class Languages extends Translations {
       'history_unlock_btn': '확장',
       'history_unlocked_title': '확장 완료!',
       'history_unlocked_desc': '히스토리가 무제한으로 확장되었습니다.',
+      'clear_data_complete': '로컬 데이터가 모두 초기화되었습니다.',
 
       // 프리미엄
       'premium_title': '프리미엄',
@@ -270,8 +289,3 @@ class Languages extends Translations {
     },
   };
 }
-
-    
-
-
-

@@ -15,14 +15,26 @@ import 'package:qr_code_generator/app/admob/ads_rewarded.dart';
 import 'package:qr_code_generator/app/controllers/setting_controller.dart';
 import 'package:qr_code_generator/app/data/enums/qr_type.dart';
 import 'package:qr_code_generator/app/services/hive_service.dart';
+import 'package:qr_code_generator/app/utils/app_toast.dart';
+
+typedef ClipboardSetter = Future<void> Function(ClipboardData data);
 
 class QrController extends GetxController {
+  QrController({
+    ClipboardSetter? clipboardSetter,
+    AppToastPresenter? toastPresenter,
+  }) : _clipboardSetter = clipboardSetter ?? Clipboard.setData,
+       _toastPresenter = toastPresenter ?? AppToast.show;
+
   static QrController get to => Get.find();
 
   static const _historyKey = 'qr_history_json';
   static const _historyUnlockedKey = 'qr_history_unlocked';
   static const _defaultMaxHistory = 20;
   static const _unlockedMaxHistory = 999;
+
+  final ClipboardSetter _clipboardSetter;
+  final AppToastPresenter _toastPresenter;
 
   // Observable max history limit
   final maxHistory = _defaultMaxHistory.obs;
@@ -187,7 +199,9 @@ class QrController extends GetxController {
         // N field required by vCard 3.0: Family;Given;Additional;Prefix;Suffix
         final nameParts = name.split(' ');
         final given = nameParts.first;
-        final family = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+        final family = nameParts.length > 1
+            ? nameParts.sublist(1).join(' ')
+            : '';
         buf.write('N:$family;$given;;;\r\n');
         buf.write('FN:$name\r\n');
         if (phone.isNotEmpty) buf.write('TEL;TYPE=CELL:$phone\r\n');
@@ -223,8 +237,7 @@ class QrController extends GetxController {
 
   Future<void> shareQr() async {
     if (qrData.value.isEmpty) {
-      Get.snackbar('error'.tr, 'qr_empty_error'.tr,
-          snackPosition: SnackPosition.BOTTOM);
+      _showErrorToast('qr_empty_error'.tr);
       return;
     }
     try {
@@ -239,13 +252,15 @@ class QrController extends GetxController {
       await _shareImageBytes(bytes);
       _addToHistory();
     } catch (e) {
-      Get.snackbar('error'.tr, '$e', snackPosition: SnackPosition.BOTTOM);
+      _showErrorToast('$e');
     }
   }
 
   Future<void> _shareImageBytes(Uint8List bytes) async {
     final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/qrcode_${DateTime.now().millisecondsSinceEpoch}.png');
+    final file = File(
+      '${dir.path}/qrcode_${DateTime.now().millisecondsSinceEpoch}.png',
+    );
     await file.writeAsBytes(bytes);
     await SharePlus.instance.share(
       ShareParams(
@@ -257,11 +272,12 @@ class QrController extends GetxController {
 
   Future<void> saveToGallery() async {
     if (qrData.value.isEmpty) {
-      Get.snackbar('error'.tr, 'qr_empty_error'.tr, snackPosition: SnackPosition.BOTTOM);
+      _showErrorToast('qr_empty_error'.tr);
       return;
     }
     try {
-      final boundary = qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary =
+          qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
       final image = await boundary.toImage(pixelRatio: 3);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
@@ -272,25 +288,34 @@ class QrController extends GetxController {
       if (!hasAccess) {
         final granted = await Gal.requestAccess(toAlbum: true);
         if (!granted) {
-          Get.snackbar('error'.tr, 'gallery_permission_denied'.tr, snackPosition: SnackPosition.BOTTOM);
+          _showErrorToast('gallery_permission_denied'.tr);
           return;
         }
       }
       await Gal.putImageBytes(bytes, album: 'QR Generator');
       _addToHistory();
-      Get.snackbar('success'.tr, 'saved_to_gallery'.tr, snackPosition: SnackPosition.BOTTOM);
+      _toastPresenter(
+        AppToastMessage.success(
+          title: 'success'.tr,
+          description: 'saved_to_gallery'.tr,
+        ),
+      );
     } catch (e) {
-      Get.snackbar('error'.tr, '$e', snackPosition: SnackPosition.BOTTOM);
+      _showErrorToast('$e');
     }
   }
 
-  void copyContent() {
+  Future<void> copyContent() async {
     if (qrData.value.isEmpty) return;
     _haptic();
-    Clipboard.setData(ClipboardData(text: qrData.value));
-    Get.snackbar('copied'.tr, qrData.value,
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2));
+    try {
+      await _clipboardSetter(ClipboardData(text: qrData.value));
+      _toastPresenter(
+        AppToastMessage.success(title: 'copied'.tr, description: qrData.value),
+      );
+    } catch (e) {
+      _showErrorToast('$e');
+    }
   }
 
   void clearForm() {
@@ -319,7 +344,8 @@ class QrController extends GetxController {
   // ─── History limit unlock ───────────────────────
 
   void _loadHistoryLimit() {
-    final unlocked = HiveService.to.getAppData<bool>(_historyUnlockedKey) ?? false;
+    final unlocked =
+        HiveService.to.getAppData<bool>(_historyUnlockedKey) ?? false;
     maxHistory.value = unlocked ? _unlockedMaxHistory : _defaultMaxHistory;
   }
 
@@ -330,11 +356,11 @@ class QrController extends GetxController {
       onUserEarnedReward: (_) async {
         maxHistory.value = _unlockedMaxHistory;
         await HiveService.to.setAppData(_historyUnlockedKey, true);
-        Get.snackbar(
-          'history_unlocked_title'.tr,
-          'history_unlocked_desc'.tr,
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 3),
+        _toastPresenter(
+          AppToastMessage.success(
+            title: 'history_unlocked_title'.tr,
+            description: 'history_unlocked_desc'.tr,
+          ),
         );
       },
     );
@@ -377,7 +403,9 @@ class QrController extends GetxController {
         final t = textCtrl.text.trim();
         return t.length > 30 ? '${t.substring(0, 30)}…' : t;
       case QrType.wifi:
-        return 'history_wifi_label'.trParams({'ssid': wifiSsidCtrl.text.trim()});
+        return 'history_wifi_label'.trParams({
+          'ssid': wifiSsidCtrl.text.trim(),
+        });
       case QrType.contact:
         return contactNameCtrl.text.trim();
       case QrType.email:
@@ -407,5 +435,11 @@ class QrController extends GetxController {
   void clearHistory() {
     history.clear();
     _saveHistory();
+  }
+
+  void _showErrorToast(String description) {
+    _toastPresenter(
+      AppToastMessage.error(title: 'error'.tr, description: description),
+    );
   }
 }
