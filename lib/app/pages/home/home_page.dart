@@ -1102,7 +1102,7 @@ class _HistorySheet extends StatelessWidget {
     };
     return Text(
       icons[type] ?? '📝',
-      style: const TextStyle(fontSize: 24),
+      style: TextStyle(fontSize: 24.sp),
     );
   }
 }
