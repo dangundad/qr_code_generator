@@ -25,7 +25,7 @@ dependencies:
   # UI
   flutter_screenutil: ^5.9.3
   flex_color_scheme: ^8.4.0
-  google_fonts: ^6.3.2
+  google_fonts: ^8.0.2
   lucide_icons_flutter: ^3.1.10
 
   # 愿묎퀬
@@ -39,7 +39,7 @@ dependencies:
   qr_flutter: ^4.1.0
 
   # ---- ?깅퀎 異붽? ?⑦궎吏 (?꾩슂???꾨옒 二쇱꽍 ?댁젣) ----
-  # fl_chart: ^0.70.2              # 李⑦듃 (媛怨꾨?, ?듦?, ?듦퀎)
+  # fl_chart: ^1.1.1              # 李⑦듃 (媛怨꾨?, ?듦?, ?듦퀎)
   # flutter_local_notifications:    # ?뚮┝ (??대㉧, 由щ쭏?몃뜑)
   # just_audio: ^0.9.42            # ?ㅻ뵒???ъ깮 (?섎㈃ ?ъ슫??
   # mobile_scanner: ^6.0.5         # QR/諛붿퐫???ㅼ틪
@@ -88,4 +88,5 @@ flutter:
       fonts:
         - asset: assets/fonts/NotoSans-Bold.ttf
           weight: 700
+
 
