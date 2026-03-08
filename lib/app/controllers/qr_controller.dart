@@ -18,13 +18,20 @@ import 'package:qr_code_generator/app/services/hive_service.dart';
 import 'package:qr_code_generator/app/utils/app_toast.dart';
 
 typedef ClipboardSetter = Future<void> Function(ClipboardData data);
+typedef QrImageBytesProvider = Future<Uint8List?> Function();
+typedef GalleryImageSaver =
+    Future<void> Function(Uint8List bytes, {String? album, String? name});
 
 class QrController extends GetxController {
   QrController({
     ClipboardSetter? clipboardSetter,
     AppToastPresenter? toastPresenter,
+    QrImageBytesProvider? qrImageBytesProvider,
+    GalleryImageSaver? galleryImageSaver,
   }) : _clipboardSetter = clipboardSetter ?? Clipboard.setData,
-       _toastPresenter = toastPresenter ?? AppToast.show;
+       _toastPresenter = toastPresenter ?? AppToast.show,
+       _qrImageBytesProvider = qrImageBytesProvider,
+       _galleryImageSaver = galleryImageSaver;
 
   static QrController get to => Get.find();
 
@@ -35,6 +42,8 @@ class QrController extends GetxController {
 
   final ClipboardSetter _clipboardSetter;
   final AppToastPresenter _toastPresenter;
+  final QrImageBytesProvider? _qrImageBytesProvider;
+  final GalleryImageSaver? _galleryImageSaver;
 
   // Observable max history limit
   final maxHistory = _defaultMaxHistory.obs;
@@ -241,13 +250,8 @@ class QrController extends GetxController {
       return;
     }
     try {
-      final boundary =
-          qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return;
-      final image = await boundary.toImage(pixelRatio: 3);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
-      final bytes = byteData.buffer.asUint8List();
+      final bytes = await _resolveQrImageBytes();
+      if (bytes == null) return;
       _haptic();
       await _shareImageBytes(bytes);
       _addToHistory();
@@ -276,23 +280,21 @@ class QrController extends GetxController {
       return;
     }
     try {
-      final boundary =
-          qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return;
-      final image = await boundary.toImage(pixelRatio: 3);
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
-      final bytes = byteData.buffer.asUint8List();
+      final bytes = await _resolveQrImageBytes();
+      if (bytes == null) return;
+      final fileName = _buildGalleryFileName();
       _haptic();
-      final hasAccess = await Gal.hasAccess(toAlbum: true);
-      if (!hasAccess) {
-        final granted = await Gal.requestAccess(toAlbum: true);
-        if (!granted) {
-          _showErrorToast('gallery_permission_denied'.tr);
-          return;
+      if (_galleryImageSaver == null) {
+        final hasAccess = await Gal.hasAccess(toAlbum: true);
+        if (!hasAccess) {
+          final granted = await Gal.requestAccess(toAlbum: true);
+          if (!granted) {
+            _showErrorToast('gallery_permission_denied'.tr);
+            return;
+          }
         }
       }
-      await Gal.putImageBytes(bytes, album: 'QR Generator');
+      await _saveImageToGallery(bytes, album: 'QR Generator', name: fileName);
       _addToHistory();
       _toastPresenter(
         AppToastMessage.success(
@@ -300,6 +302,12 @@ class QrController extends GetxController {
           description: 'saved_to_gallery'.tr,
         ),
       );
+    } on GalException catch (e) {
+      if (e.type == GalExceptionType.accessDenied) {
+        _showErrorToast('gallery_permission_denied'.tr);
+        return;
+      }
+      _showErrorToast('$e');
     } catch (e) {
       _showErrorToast('$e');
     }
@@ -441,5 +449,40 @@ class QrController extends GetxController {
     _toastPresenter(
       AppToastMessage.error(title: 'error'.tr, description: description),
     );
+  }
+
+  Future<Uint8List?> _resolveQrImageBytes() async {
+    final injectedProvider = _qrImageBytesProvider;
+    if (injectedProvider != null) {
+      return injectedProvider();
+    }
+
+    final boundary =
+        qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) {
+      return null;
+    }
+
+    final image = await boundary.toImage(pixelRatio: 3);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
+  }
+
+  Future<void> _saveImageToGallery(
+    Uint8List bytes, {
+    required String album,
+    required String name,
+  }) async {
+    final injectedSaver = _galleryImageSaver;
+    if (injectedSaver != null) {
+      await injectedSaver(bytes, album: album, name: name);
+      return;
+    }
+
+    await Gal.putImageBytes(bytes, album: album, name: name);
+  }
+
+  String _buildGalleryFileName() {
+    return 'qrcode_${DateTime.now().millisecondsSinceEpoch}.png';
   }
 }
