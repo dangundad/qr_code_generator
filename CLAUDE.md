@@ -1,147 +1,75 @@
-# CLAUDE.md
+# QR Code Generator 개발 가이드
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> 문서: `CLAUDE.md`
+> This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> 최종 업데이트: 2026-03-08
+> 기준: 현재 앱 저장소 스캔 + `C:\Flutter_WorkSpace\Flutter_Plan\AGENTS.md` 포트폴리오 상태표
 
-## 프로젝트 개요
+## 프로젝트 요약
+- 앱 번호: 37
+- Phase: 4
+- 상태: ✅ 기능구현
+- 난이도: ★☆☆
+- 광고 등급: 중하
+- 프로젝트 폴더: `qr_code_generator`
+- `pubspec` 이름: `qr_code_generator`
+- Android 패키지: `com.dangundad.qrcodegenerator`
+- 버전: `1.0.0+1`
+- 핵심 기능: URL/텍스트/연락처/Wi-Fi/이메일 QR 생성, 색상 커스텀, 공유
 
-QR 코드 생성기 앱. URL, 텍스트, Wi-Fi, 연락처(vCard), 이메일 등 다양한 유형의 QR 코드를 생성하고 색상 커스터마이징, 갤러리 저장, 공유 기능을 제공합니다.
+## 공통 작업 원칙
+- 모든 텍스트 파일은 UTF-8로 유지하고, PowerShell에서 파일을 쓸 때는 `-Encoding UTF8`을 명시합니다.
+- AI/코드 어시스턴트의 설명, 진행 업데이트, 최종 답변은 기본적으로 한국어로 작성합니다.
+- Android 우선 프로젝트이며, 별도 요청 없이 iOS 전용 코드는 추가하지 않습니다.
+- 릴리스 빌드는 실행하지 않습니다. 일반 작업에서는 `flutter build apk`/`flutter build ios`를 사용하지 않습니다.
+- 코드 변경 후에는 반드시 `flutter analyze`와 `flutter test`를 실행해 결과를 확인합니다.
+- Hive `@HiveType` 모델을 추가하거나 수정했다면 `dart run build_runner build --delete-conflicting-outputs`를 실행합니다.
+- 상태 관리는 GetX, 로컬 저장은 Hive_CE 패턴을 유지하고 기존 네비게이션/영속성 구조를 임의로 바꾸지 않습니다.
+- Windows 표준 경로를 사용하고 WSL 경로(`/mnt/c/...`)는 사용하지 않습니다.
+- `2>nul`, `>nul` 리다이렉션은 사용하지 않으며, `nul` 파일이 생기면 정리합니다.
 
-- 패키지명: `com.dangundad.qrcodegenerator`
-- 개발사: DangunDad (`dangundad@gmail.com`)
-- 설계 크기: 375x812 (ScreenUtil 기준)
-- 테마: `FlexScheme.blueM3` (라이트/다크 모두)
-
-## 기술 스택
-
-| 영역 | 기술 |
-|------|------|
-| 상태 관리 | GetX (`GetxController`, `.obs`, `Obx()`) |
-| 로컬 저장 | Hive_CE (설정/앱 데이터 박스) |
-| UI 반응형 | flutter_screenutil |
-| 테마 | flex_color_scheme (`FlexScheme.blueM3`) |
-| QR 생성 | qr_flutter |
-| 갤러리 저장 | gal |
-| 광고 | google_mobile_ads + AdMob 미디에이션 (AppLovin, Pangle, Unity) |
-| 인앱 구매 | in_app_purchase |
-| 다국어 | GetX 번역 (ko) |
-
-## 개발 명령어
-
+## 빠른 명령어
 ```bash
+cd C:\Flutter_WorkSpace\qr_code_generator
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter analyze
+flutter test
 flutter run
 ```
 
-## 아키텍처
+## 현재 의존성 하이라이트
+- 기반: `get` ^4.7.3, `hive_ce` ^2.19.3, `hive_ce_flutter` ^2.3.4, `path_provider` ^2.1.5, `intl` ^0.20.2, `uuid` ^4.5.3
+- UI/UX: `flutter_screenutil` ^5.9.3, `flex_color_scheme` ^8.4.0, `google_fonts` ^6.3.2, `lucide_icons_flutter` ^3.1.10, `flutter_animate` ^4.5.2
+- 수익화/운영: `google_mobile_ads` ^6.0.0, `gma_mediation_applovin` ^2.5.1, `gma_mediation_pangle` ^3.5.0, `gma_mediation_unity` ^1.6.2, `in_app_purchase` ^3.2.3, `in_app_review` ^2.0.11, `rate_my_app` ^2.3.2, `firebase_core` ^4.4.0, `firebase_analytics` ^12.1.2, `firebase_crashlytics` ^5.0.7, `device_info_plus` ^12.3.0, `package_info_plus` ^9.0.0, `permission_handler` ^12.0.1, `share_plus` ^12.0.1, `url_launcher` ^6.3.2, `wakelock_plus` ^1.4.0, `vibration` ^3.1.8
+- 앱 특화: `qr_flutter` ^4.1.0
+- 기타: `gal` ^2.3.0, `toastification` ^3.0.3
 
-### 프로젝트 구조
+## 최신 반영 메모
+- 최근 UX 패키지 롤아웃 대상 앱으로 `url_launcher` 사용 지점을 문서와 함께 유지합니다.
 
-```
-lib/
-├── main.dart
-├── hive_registrar.g.dart
-├── app/
-│   ├── admob/
-│   │   ├── ads_banner.dart
-│   │   ├── ads_helper.dart
-│   │   ├── ads_interstitial.dart
-│   │   └── ads_rewarded.dart
-│   ├── bindings/
-│   │   └── app_binding.dart
-│   ├── controllers/
-│   │   ├── history_controller.dart
-│   │   ├── home_controller.dart
-│   │   ├── premium_controller.dart
-│   │   ├── qr_controller.dart
-│   │   ├── setting_controller.dart
-│   │   └── stats_controller.dart
-│   ├── data/
-│   │   └── enums/
-│   │       └── qr_type.dart          # url, text, wifi, contact, email
-│   ├── pages/
-│   │   ├── guide/guide_page.dart
-│   │   ├── history/history_page.dart
-│   │   ├── home/home_page.dart
-│   │   ├── premium/
-│   │   │   ├── premium_binding.dart
-│   │   │   └── premium_page.dart
-│   │   ├── settings/settings_page.dart
-│   │   └── stats/stats_page.dart
-│   ├── routes/
-│   │   ├── app_pages.dart
-│   │   └── app_routes.dart
-│   ├── services/
-│   │   ├── activity_log_service.dart
-│   │   ├── app_rating_service.dart
-│   │   ├── hive_service.dart
-│   │   └── purchase_service.dart
-│   ├── theme/
-│   │   └── app_flex_theme.dart
-│   ├── translate/
-│   │   └── translate.dart
-│   └── utils/
-│       └── app_constants.dart
-```
+## 현재 코드 구조
+- `lib/app` 디렉터리: `admob`, `bindings`, `controllers`, `data`, `pages`, `routes`, `services`, `theme`, `translate`, `utils`, `widgets`
+- `bindings`: `app_binding.dart`
+- `routes`: `app_pages.dart`, `app_routes.dart`
+- `controllers`: `history_controller.dart`, `home_controller.dart`, `premium_controller.dart`, `qr_controller.dart`, `setting_controller.dart`, `stats_controller.dart`
+- 기능 중심 컨트롤러: `qr_controller`
+- `services`: `activity_log_service.dart`, `app_rating_service.dart`, `hive_service.dart`, `purchase_service.dart`
+- 기능 중심 서비스: 없음
+- `pages`: `guide`, `history`, `home`, `premium`, `settings`, `stats`
+- `widgets`: 없음
+- `mixins`: 없음
+- `utils`: `app_constants.dart`, `app_toast.dart`
+- `translate`: `translate.dart`
+- `theme`: `app_flex_theme.dart`
+- `data/models`: 없음
+- `data/enums`: `qr_type.dart`
+- `data/constants`: 없음
+- `data` 루트 파일: 없음
+- `assets`: `data`, `fonts`, `images`
+- `tests`: 4개: `test/app/controllers/qr_controller_test.dart`, `test/app/controllers/setting_controller_test.dart`, `test/app/pages/settings_page_test.dart`, `test/widget_test.dart`
 
-### 서비스 초기화 흐름
-
-`main()` -> AdMob 동의 폼 초기화 -> `AppBinding.initializeServices()` (Hive 초기화 + 서비스 등록) -> `runApp()`
-
-### GetX 의존성 트리
-
-**영구 서비스 (permanent: true)**
-- `HiveService` -- Hive 박스 관리 (`settings`, `app_data`)
-- `ActivityLogService` -- 이벤트 로그
-- `PurchaseService` -- IAP 관리, 프리미엄 상태에 따라 광고 매니저 동적 등록/해제
-- `QrController` -- QR 생성 핵심 로직 (유형별 입력, 히스토리, 공유/저장)
-- `SettingController` -- 앱 설정
-- `InterstitialAdManager` / `RewardedAdManager` -- 광고 (비프리미엄 시)
-
-**LazyPut (필요 시 생성)**
-- `HistoryController`, `StatsController`, `PremiumController`
-
-### 라우팅
-
-| 경로 | 페이지 | 바인딩 |
-|------|--------|--------|
-| `/home` | `HomePage` | `AppBinding` |
-| `/guide` | `GuidePage` | -- |
-| `/settings` | `SettingsPage` | -- |
-| `/history` | `HistoryPage` | -- |
-| `/stats` | `StatsPage` | -- |
-| `/premium` | `PremiumPage` | `PremiumBinding` |
-
-### QR 생성 핵심 구조
-
-`QrController`가 5가지 QR 유형(`QrType`: url, text, wifi, contact, email)을 관리합니다.
-- 각 유형별 `TextEditingController`로 입력 수집
-- `_buildQrString()`에서 유형별 포맷 변환 (vCard 3.0, Wi-Fi QR 스펙, mailto: 등)
-- Wi-Fi 필드 특수문자 이스케이프 처리 (`_escapeWifiField`)
-- QR 외관: 전경색 6종 + 배경색 6종 선택 가능
-- `RepaintBoundary` + `toImage()`로 QR 이미지 캡처 후 공유/저장
-
-### 히스토리 시스템
-
-- JSON 직렬화로 Hive `app_data` 박스에 저장
-- 기본 20개 제한, 보상형 광고 시청 시 999개로 확장
-- 중복 콘텐츠 자동 제거 (최신이 앞으로)
-
-### 스토리지 구조
-
-| Hive 박스 | 용도 | 담당 서비스 |
-|-----------|------|-------------|
-| `settings` | 범용 설정 (key-value) | `HiveService` |
-| `app_data` | 범용 앱 데이터 (히스토리 JSON 등) | `HiveService` |
-
-### 다국어
-
-현재 `ko` 키만 정의. 새 문자열은 `lib/app/translate/translate.dart`에 `ko` 섹션에만 추가.
-
-## 개발 가이드라인
-
-- QR 유형 추가 시: `QrType` enum 확장 + `_buildQrString()` case 추가 + 입력 폼 UI 추가
-- 색상 옵션 추가 시: `QrController.fgColorOptions` / `bgColorOptions` 수정
-- Worker (`ever`)는 `onClose()`에서 반드시 dispose
-- TextEditingController도 `onClose()`에서 dispose 필수
+## 문서 유지 규칙
+- 새 페이지나 바인딩을 추가하면 이 문서의 `pages`/`bindings` 요약도 함께 갱신합니다.
+- 의존성 추가/제거, Android 패키지명 변경, 테스트 확장은 이 문서에 바로 반영합니다.
+- 포트폴리오 상태가 바뀌면 메타 레포 `AGENTS.md`, `CLAUDE.md`, 관련 `docs/*.md`와 함께 동기화합니다.
